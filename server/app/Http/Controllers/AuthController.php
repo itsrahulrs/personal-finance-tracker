@@ -28,9 +28,11 @@ class AuthController extends Controller
                 'password' => Hash::make($validated['password']),
             ]);
     
+            $user->sendEmailVerificationNotification();
+            
             return response()->json([
-                'message' => 'User created successfully',
-                'token' => $user->createToken('authToken')->plainTextToken
+                'message' => 'User registered successfully. Please verify your email.',
+                // 'token' => $user->createToken('authToken')->plainTextToken
             ], 201);
         } catch (ValidationException $e) {
             return response()->json([

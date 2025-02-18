@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\UserController;
+use Illuminate\Foundation\Auth\EmailVerificationRequest;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -20,3 +21,21 @@ Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login']);
 Route::post('/logout', [AuthController::class, 'logout'])->middleware('auth:sanctum');
 Route::get('/profile', [AuthController::class, 'profile'])->middleware('auth:sanctum');
+
+Route::middleware('auth:sanctum')->group(function () {
+    Route::get('/email/verify/{id}/{hash}', function (EmailVerificationRequest $request) {
+        $request->fullUrl();
+        return response()->json(['message'=> 'Email verified successfully']);
+    })->middleware(['signed'])->name('verification.verify');
+
+    Route::post('/email/resend', function (Request $request) {
+        $request->user()->SendEmailVerificationNotification();
+        return response()->json(['message'=> 'Verification email sent']);
+    })->middleware('auth:sanctum');
+});
+
+Route::middleware(['auth:sanctum', 'verified'])->group(function () {
+    Route::get('/dashboard', function () {
+        return response()->json(['message' => 'Welcome to your dashboard']);
+    });
+});
