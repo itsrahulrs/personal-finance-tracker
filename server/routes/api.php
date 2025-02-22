@@ -24,35 +24,33 @@ Route::post('/login', [AuthController::class, 'login']);
 Route::post('/logout', [AuthController::class, 'logout'])->middleware('auth:sanctum');
 Route::get('/profile', [AuthController::class, 'profile'])->middleware('auth:sanctum');
 
-Route::middleware('auth:sanctum')->group(function () {
-    Route::get('/email/verify/{id}/{hash}', function (EmailVerificationRequest $request) {
-        $user = User::find($request->route("id"));
+Route::get('/email/verify/{id}/{hash}', function (Request $request) {
+    $user = User::find($request->route("id"));
 
-        if(!$user) {
-            return response()->json([
-                'message'=> 'User not found'
-            ], 404);
-        }
-
-        if($user->hasVerifidEmail) {
-            return response()->json([
-                'message' => 'Email already verified'
-            ], 400);
-        }
-
-        $request->fulfill();
-
+    if(!$user) {
         return response()->json([
-            'message'=> 'Email verified successfully'
-        ]);
-    })->middleware(['signed'])->name('verification.verify');
+            'message'=> 'User not found'
+        ], 404);
+    }
 
-    Route::post('/email/resend', function (Request $request) {
-        
-        $request->user()->SendEmailVerificationNotification();
-        return response()->json(['message'=> 'Verification email sent']);
-    })->middleware('auth:sanctum');
-});
+    if($user->hasVerifidEmail) {
+        return response()->json([
+            'message' => 'Email already verified'
+        ], 400);
+    }
+
+    $user->markEmailAsVerified();
+
+    return response()->json([
+        'message'=> 'Email verified successfully'
+    ]);
+})->middleware(['signed'])->name('verification.verify');
+
+Route::middleware('auth:sanctum')->post('/email/resend', function (Request $request) {
+    
+    $request->user()->SendEmailVerificationNotification();
+    return response()->json(['message'=> 'Verification email sent']);
+})->middleware('auth:sanctum');
 
 Route::middleware(['auth:sanctum', 'verified'])->group(function () {
     Route::get('/dashboard', function (Request $request) {
