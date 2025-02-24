@@ -3,6 +3,7 @@
 use App\Http\Controllers\AccountCategoryController;
 use App\Http\Controllers\AccountController;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\UserController;
 use App\Models\User;
 use Illuminate\Foundation\Auth\EmailVerificationRequest;
@@ -62,4 +63,5 @@ Route::middleware(['auth:sanctum', 'verified'])->group(function () {
     });
     Route::apiResource('/account-category', AccountCategoryController::class);
     Route::apiResource('/account', AccountController::class);
+    Route::apiResource('/category', CategoryController::class);
 });
