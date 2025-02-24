@@ -14,7 +14,7 @@ class AccountController extends Controller
      */
     public function index()
     {
-        $account = Account::with('accountCategory')->get();
+        $account = Account::with(['accountCategory', 'transactions'])->get();
         return response()->json([
             'status' => true,
             'message' => 'Account fetched successfully',
@@ -56,7 +56,7 @@ class AccountController extends Controller
     public function show($id)
     {
         try {
-            $account = Account::with('accountCategory')->findOrFail($id);
+            $account = Account::with(['accountCategory', 'transactions'])->findOrFail($id);
             return response()->json([
                 'status' => true,
                 'message' => 'Account found successfully',
@@ -93,7 +93,7 @@ class AccountController extends Controller
     
             $account = Account::with('accountCategory')->findOrFail($id);
             $account->update($request->all());
-            $account = Account::with('accountCategory')->findOrFail($id);
+            $account = Account::with(['accountCategory', 'transactions'])->findOrFail($id);
             return response()->json([
                 'status' => true,
                 'message' => 'Account updated successfully',

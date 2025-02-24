@@ -22,4 +22,8 @@ class Account extends Model
     public function accountCategory() {
         return $this->belongsTo(AccountCategory::class);
     }
+
+    public function transactions() {
+        return $this->hasMany(Transaction::class);
+    }
 }

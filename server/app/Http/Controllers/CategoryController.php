@@ -10,7 +10,7 @@ use Illuminate\Support\Facades\Validator;
 class CategoryController extends Controller
 {
     public function index() {
-        $categories = Category::all();
+        $categories = Category::with('transactions')->get();
         return response()->json([
             'status' => true,
             'message' => 'Account categories fetched successfully',
@@ -20,7 +20,7 @@ class CategoryController extends Controller
 
     public function show($id) {
         try {
-            $category = Category::findOrFail($id);
+            $category = Category::with('transactions')->findOrFail($id);
             return response()->json([
                 'status' => true,
                 'message' => 'Category found successfully',
@@ -73,6 +73,7 @@ class CategoryController extends Controller
     
             $category = Category::findOrFail($id);
             $category->update($request->all());
+            $category = Category::with('transactions')->findOrFail($id);
             return response()->json([
                 'status' => true,
                 'message' => 'Category updated successfully',
