@@ -6,18 +6,20 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
-class AccountCategory extends Model
+class Account extends Model
 {
     use HasFactory, SoftDeletes;
 
     protected $fillable = [
+        'account_category_id',
         'name',
-        'description'
+        'description',
+        'balance'
     ];
 
     protected $dates = ['deleted_at'];
 
-    public function accounts() {
-        return $this->hasMany(Account::class);
+    public function accountCategory() {
+        return $this->belongsTo(AccountCategory::class);
     }
 }

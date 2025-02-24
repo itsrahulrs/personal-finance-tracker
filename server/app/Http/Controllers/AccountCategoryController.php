@@ -10,7 +10,7 @@ use Illuminate\Support\Facades\Validator;
 class AccountCategoryController extends Controller
 {
     public function index() {
-        $accountCategories = AccountCategory::all();
+        $accountCategories = AccountCategory::with('accounts')->get();
         return response()->json([
             'status' => true,
             'message' => 'Account categories fetched successfully',
@@ -42,7 +42,7 @@ class AccountCategoryController extends Controller
 
         if($validator->fails()) {
             return response()->json([
-                'statud' => false,
+                'status' => false,
                 'message' => 'Validation error',
                 'errors' => $validator->errors()
             ], 422);
@@ -65,10 +65,9 @@ class AccountCategoryController extends Controller
     
             if($validator->fails()) {
                 return response()->json([
-                    'statud' => false,
+                    'status' => false,
                     'message' => 'Validation error',
-                    'errors' => $validator->errors(),
-                    'request' => $request
+                    'errors' => $validator->errors()
                 ], 422);
             }
     
