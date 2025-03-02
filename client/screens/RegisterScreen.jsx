@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, Button, Alert, StyleSheet } from 'react-native';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import { View, Text, TextInput, Button, Alert, StyleSheet, ActivityIndicator } from 'react-native';
 
 const RegisterScreen = ({ navigation }) => {
     const [form, setForm] = useState({
@@ -11,6 +10,8 @@ const RegisterScreen = ({ navigation }) => {
         password: '',
         password_confirmation: '',
     });
+
+    const [loading, setLoading] = useState(false); // Track loading state
 
     const handleChange = (name, value) => {
         setForm({ ...form, [name]: value });
@@ -28,7 +29,7 @@ const RegisterScreen = ({ navigation }) => {
         }
 
         if (!form.password) {
-            Alert.alert('Error', 'Password are required');
+            Alert.alert('Error', 'Password is required');
             return;
         }
 
@@ -37,27 +38,29 @@ const RegisterScreen = ({ navigation }) => {
             return;
         }
 
-        // Save user data (mock example)
+        setLoading(true); // Show loader
+
         try {
             const response = await fetch('http://192.168.31.167:8000/api/register', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(form),
-            }) 
+            });
 
             const data = await response.json();
-      
+
             if (response.ok) {
-              Alert.alert('Success', 'Registration successful and please verify your email before continue!');
-              navigation.navigate('Login');
+                Alert.alert('Success', 'Registration successful! Please verify your email before continuing.');
+                navigation.navigate('Login'); // Redirect to Login screen
             } else {
-              Alert.alert('Error', data.message || 'Registration failed');
-              console.log(data);
-              
+                Alert.alert('Error', data.message || 'Registration failed');
+                console.log(data);
             }
         } catch (error) {
             console.log(error);
-            Alert.alert('Error', 'Something went wrongs!');
+            Alert.alert('Error', 'Something went wrong!');
+        } finally {
+            setLoading(false); // Hide loader after request completes
         }
     };
 
@@ -70,7 +73,13 @@ const RegisterScreen = ({ navigation }) => {
             <TextInput style={styles.input} placeholder="Email" keyboardType="email-address" onChangeText={(value) => handleChange('email', value)} />
             <TextInput style={styles.input} placeholder="Password" secureTextEntry onChangeText={(value) => handleChange('password', value)} />
             <TextInput style={styles.input} placeholder="Confirm Password" secureTextEntry onChangeText={(value) => handleChange('password_confirmation', value)} />
-            <Button title="Register" onPress={handleRegister} />
+
+            {loading ? (
+                <ActivityIndicator size="large" color="#0000ff" /> // Show loader when API is in progress
+            ) : (
+                <Button title="Register" onPress={handleRegister} />
+            )}
+
             <Text style={styles.link} onPress={() => navigation.navigate('Login')}>Already have an account? Login</Text>
         </View>
     );
