@@ -1,57 +1,152 @@
 import React, { useEffect, useState } from "react";
-import { 
-    View, Text, ActivityIndicator, Alert, 
-    TouchableOpacity, Modal, StyleSheet 
+import {
+    View, Text, ActivityIndicator, Alert, TouchableOpacity,
+    Modal, TextInput, FlatList, StyleSheet
 } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { MaterialIcons } from "@expo/vector-icons";
 
-const AccountCategoryScreen = ({ navigation, onLogout }) => {
-    const [userProfile, setUserProfile] = useState(null);
+const AccountCategoryScreen = ({ navigation }) => {
+    const [categories, setCategories] = useState([]);
     const [loading, setLoading] = useState(true);
-    const [menuVisible, setMenuVisible] = useState(false);
+    const [modalVisible, setModalVisible] = useState(false);
+    const [editMode, setEditMode] = useState(false);
+    const [selectedCategory, setSelectedCategory] = useState(null);
+    const [categoryName, setCategoryName] = useState("");
+    const [categoryDescription, setCategoryDescription] = useState("");
+    const [nameError, setNameError] = useState("");
 
     useEffect(() => {
-        const fetchUserProfile = async () => {
-            try {
-                const token = await AsyncStorage.getItem("authToken");
-                if (!token) {
-                    Alert.alert("Error", "No authentication token found.");
-                    return;
-                }
+        fetchCategories();
+    }, []);
 
-                const response = await fetch("http://192.168.31.167:8000/api/profile", {
-                    method: "GET",
-                    headers: {
-                        "Content-Type": "application/json",
-                        "Authorization": `Bearer ${token}`,
-                    },
-                });
+    const fetchCategories = async () => {
+        try {
+            const token = await AsyncStorage.getItem("authToken");
+            const response = await fetch("http://192.168.31.167:8000/api/account-category", {
+                method: "GET",
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": `Bearer ${token}`,
+                },
+            });
 
-                const data = await response.json();
-                if (response.ok) {
-                    setUserProfile(data);
-                    navigation.setOptions({
-                        headerRight: () => (
-                            <TouchableOpacity onPress={() => setMenuVisible(true)}>
-                                <Text style={{ marginRight: 15, fontWeight: "bold" }}>
-                                    {data.first_name} {data.last_name} ⏷
-                                </Text>
-                            </TouchableOpacity>
-                        ),
-                    });
-                } else {
-                    Alert.alert("Error", data.message || "Failed to load profile.");
-                }
-            } catch (error) {
-                console.error("Fetch Error:", error);
-                Alert.alert("Error", "Network request failed.");
-            } finally {
-                setLoading(false);
+            const data = await response.json();
+            if (response.ok) {
+                setCategories(data.data);
+            } else {
+                Alert.alert("Error", data.message || "Failed to load categories.");
             }
-        };
+        } catch (error) {
+            console.error("Fetch Error:", error);
+            Alert.alert("Error", "Network request failed.");
+        } finally {
+            setLoading(false);
+        }
+    };
 
-        fetchUserProfile();
-    }, [navigation]);
+    const addCategory = async () => {
+        if (!categoryName.trim()) {
+            setNameError("Category name is required.");
+            return;
+        }
+
+        try {
+            const token = await AsyncStorage.getItem("authToken");
+            const response = await fetch("http://192.168.31.167:8000/api/account-category", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": `Bearer ${token}`,
+                },
+                body: JSON.stringify({ name: categoryName, description: categoryDescription }),
+            });
+
+            const data = await response.json();
+            if (response.ok) {
+                setCategories([...categories, data.data]);
+                setCategoryName("");
+                setCategoryDescription("");
+                setModalVisible(false);
+            } else {
+                Alert.alert("Error", data.message || "Failed to add category.");
+            }
+        } catch (error) {
+            console.error("Add Category Error:", error);
+            Alert.alert("Error", "Could not add category.");
+        }
+    };
+
+    const updateCategory = async () => {
+        if (!categoryName.trim()) {
+            setNameError("Category name is required.");
+            return;
+        }
+
+        try {
+            const token = await AsyncStorage.getItem("authToken");
+            const response = await fetch(`http://192.168.31.167:8000/api/account-category/${selectedCategory.id}`, {
+                method: "PUT",
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": `Bearer ${token}`,
+                },
+                body: JSON.stringify({ name: categoryName, description: categoryDescription }),
+            });
+
+            const data = await response.json();
+            if (response.ok) {
+                setCategories(categories.map(cat => cat.id === selectedCategory.id ? data.data : cat));
+                setCategoryName("");
+                setCategoryDescription("");
+                setModalVisible(false);
+                setEditMode(false);
+            } else {
+                Alert.alert("Error", data.message || "Failed to update category.");
+            }
+        } catch (error) {
+            console.error("Update Category Error:", error);
+            Alert.alert("Error", "Could not update category.");
+        }
+    };
+
+    const openEditModal = (category) => {
+        setSelectedCategory(category);
+        setCategoryName(category.name);
+        setCategoryDescription(category.description);
+        setEditMode(true);
+        setModalVisible(true);
+    };
+
+    const deleteCategory = async (categoryId) => {
+        Alert.alert("Confirm", "Are you sure you want to delete this category?", [
+            { text: "Cancel", style: "cancel" },
+            {
+                text: "Delete",
+                style: "destructive",
+                onPress: async () => {
+                    try {
+                        const token = await AsyncStorage.getItem("authToken");
+                        const response = await fetch(`http://192.168.31.167:8000/api/account-category/${categoryId}`, {
+                            method: "DELETE",
+                            headers: {
+                                "Authorization": `Bearer ${token}`,
+                            },
+                        });
+
+                        if (response.ok) {
+                            setCategories(categories.filter(cat => cat.id !== categoryId));
+                        } else {
+                            Alert.alert("Error", "Failed to delete category.");
+                        }
+                    } catch (error) {
+                        console.error("Delete Category Error:", error);
+                        Alert.alert("Error", "Could not delete category.");
+                    }
+                }
+            }
+        ]);
+    };
 
     if (loading) {
         return (
@@ -63,39 +158,91 @@ const AccountCategoryScreen = ({ navigation, onLogout }) => {
 
     return (
         <View style={styles.container}>
-            {userProfile ? (
-                <>
-                    <Text style={styles.welcome}>asd, {userProfile.first_name}!</Text>
-                    <Text>Email: {userProfile.email}</Text>
-                </>
-            ) : (
-                <Text>Error loading profile</Text>
-            )}
-
-            {/* Dropdown Modal */}
-            <Modal transparent={true} visible={menuVisible} animationType="fade">
-                <TouchableOpacity style={styles.overlay} onPress={() => setMenuVisible(false)}>
-                    <View style={styles.dropdown}>
-                        <Text style={styles.dropdownItem}>{userProfile?.first_name} {userProfile?.last_name}</Text>
-                        <Text style={[styles.dropdownItem, styles.disabled]}>Change Password (Disabled)</Text>
-                        <TouchableOpacity>
-                            <Text style={styles.dropdownItem} onPress={onLogout}>Logout</Text>
+            <FlatList
+                data={categories}
+                keyExtractor={(item) => item.id.toString()}
+                renderItem={({ item }) => (
+                    <View style={styles.item}>
+                        <View style={styles.textContainer}>
+                            <Text style={styles.name}>{item.name}</Text>
+                            <Text style={styles.description}>{item.description}</Text>
+                        </View>
+                        <TouchableOpacity onPress={() => openEditModal(item)}>
+                            <MaterialIcons name="edit" size={24} color="blue" />
+                        </TouchableOpacity>
+                        <TouchableOpacity onPress={() => deleteCategory(item.id)}>
+                            <MaterialIcons name="delete" size={24} color="red" />
                         </TouchableOpacity>
                     </View>
-                </TouchableOpacity>
+                )}
+            />
+
+            {/* Add Category Button */}
+            <TouchableOpacity style={styles.addButton} onPress={() => {
+                setEditMode(false);
+                setCategoryName("");
+                setCategoryDescription("");
+                setModalVisible(true);
+            }}>
+                <Text style={styles.addButtonText}>+ Add Category</Text>
+            </TouchableOpacity>
+
+            {/* Add/Edit Category Modal */}
+            <Modal transparent={true} visible={modalVisible} animationType="slide">
+                <View style={styles.overlay}>
+                    <View style={styles.modal}>
+                        <Text style={styles.modalTitle}>{editMode ? "Edit Category" : "Add Category"}</Text>
+                        <TextInput
+                            placeholder="Name"
+                            value={categoryName}
+                            onChangeText={(text) => {
+                                setCategoryName(text);
+                                if (text.trim()) setNameError(""); // Clear error when user types
+                            }}
+                            style={[styles.input, nameError ? styles.inputError : null]}
+                        />
+                        { nameError ? <Text style={styles.errorText}>{nameError}</Text> : null }
+                        <TextInput
+                            placeholder="Description"
+                            value={categoryDescription}
+                            onChangeText={setCategoryDescription}
+                            style={styles.input}
+                        />
+                        <TouchableOpacity style={styles.modalButton} onPress={editMode ? updateCategory : addCategory}>
+                            <Text style={styles.modalButtonText}>{editMode ? "Update" : "Add"}</Text>
+                        </TouchableOpacity>
+                        <TouchableOpacity style={styles.modalCancel} onPress={() => setModalVisible(false)}>
+                            <Text style={styles.modalCancelText}>Cancel</Text>
+                        </TouchableOpacity>
+                    </View>
+                </View>
             </Modal>
         </View>
     );
 };
 
 const styles = StyleSheet.create({
-    container: { flex: 1, padding: 20, justifyContent: "center" },
+    container: { flex: 1, padding: 20 },
     centered: { flex: 1, justifyContent: "center", alignItems: "center" },
-    welcome: { fontSize: 20, fontWeight: "bold", marginBottom: 10 },
+    item: {
+        flexDirection: "row", justifyContent: "space-between", alignItems: "center",
+        padding: 15, backgroundColor: "#f9f9f9", marginVertical: 5, borderRadius: 8, elevation: 3
+    },
+    textContainer: { flex: 1 },
+    name: { fontSize: 18, fontWeight: "bold" },
+    description: { fontSize: 14, color: "gray" },
+    addButton: { backgroundColor: "#007bff", padding: 15, alignItems: "center", borderRadius: 8, marginTop: 10 },
+    addButtonText: { color: "#fff", fontSize: 16, fontWeight: "bold" },
     overlay: { flex: 1, justifyContent: "center", alignItems: "center", backgroundColor: "rgba(0,0,0,0.3)" },
-    dropdown: { backgroundColor: "#fff", padding: 15, borderRadius: 10, width: 200, elevation: 5 },
-    dropdownItem: { fontSize: 16, padding: 10 },
-    disabled: { color: "gray" },
+    modal: { backgroundColor: "#fff", padding: 20, borderRadius: 10, width: 300, elevation: 5, alignItems: "center" },
+    modalTitle: { fontSize: 18, fontWeight: "bold", marginBottom: 10 },
+    input: { width: "100%", padding: 10, borderWidth: 1, borderColor: "#ccc", borderRadius: 8, marginBottom: 10 },
+    modalButton: { backgroundColor: "#28a745", padding: 10, borderRadius: 8, width: "100%", alignItems: "center" },
+    modalButtonText: { color: "#fff", fontSize: 16 },
+    modalCancel: { marginTop: 10 },
+    modalCancelText: { color: "#007bff", fontSize: 16 },
+    inputError: { borderColor: "red", borderWidth: 1 },
+    errorText: { color: "red", fontSize: 14, marginTop: 2, alignSelf: "flex-start", marginBottom: 15 },
 });
 
 export default AccountCategoryScreen;
