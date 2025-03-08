@@ -47,6 +47,7 @@ const AccountScreen = ({ navigation, onLogout }) => {
             if (response.ok) {
                 setAccounts(data.data);  // Update state with API data
             } else {
+                console.error("Failed to load accounts:", data);
                 Alert.alert("Error", data.message || "Failed to load accounts.");
             }
         } catch (error) {
@@ -55,7 +56,7 @@ const AccountScreen = ({ navigation, onLogout }) => {
         }
     };
     const addAccount = async () => {
-        if (!name.trim() || !accountCategoryId || !balance) {
+        if (!name.trim() || !categoryValue || !balance) {
             Alert.alert("Error", "Please fill in all required fields.");
             return;
         }
@@ -81,7 +82,7 @@ const AccountScreen = ({ navigation, onLogout }) => {
                 body: JSON.stringify({
                     name,
                     description,
-                    account_category_id: accountCategoryId,
+                    account_category_id: categoryValue,
                     balance: formattedBalance,
                 }),
             });
@@ -94,8 +95,9 @@ const AccountScreen = ({ navigation, onLogout }) => {
                 setAccountCategoryId("");
                 setBalance("");
                 setEditMode(false);
-                fetchAccounts(); // Refresh the list
+                fetchAccounts();
             } else {
+                console.error("Failed to save account:", data);
                 Alert.alert("Error", data.message || "Failed to save account.");
             }
         } catch (error) {
@@ -128,7 +130,8 @@ const AccountScreen = ({ navigation, onLogout }) => {
                                 Alert.alert("Success", "Account deleted successfully.");
                                 fetchAccounts(); // Refresh the list
                             } else {
-                                Alert.alert("Error", data.message || "Failed to delete account.");
+                                console.error("Failed to delete account:", data);
+                                Alert.alert("Error", data.messaXge || "Failed to delete account.");
                             }
                         } catch (error) {
                             console.error("Delete Error:", error);
@@ -173,9 +176,10 @@ const AccountScreen = ({ navigation, onLogout }) => {
                     label: item.name,
                     value: item.id
                 }));
-                
+
                 setCategories(formattedCategories);
             } else {
+                console.error("Fetch Categories Error:", data);
                 Alert.alert("Error", data.message || "Failed to load categories.");
             }
         } catch (error) {
@@ -225,7 +229,9 @@ const AccountScreen = ({ navigation, onLogout }) => {
                     <View style={styles.modal}>
                         <Text style={styles.modalTitle}>{editMode ? "Edit Account" : "Add Account"}</Text>
                         <TextInput placeholder="Name" value={name} onChangeText={setName} style={styles.input} />
-                        <TextInput placeholder="Description (optional)" value={description} onChangeText={setDescription} style={styles.input} />
+                        <TextInput placeholder="Description (optional)"
+                            multiline={true}
+                            numberOfLines={4} value={description} onChangeText={setDescription} style={styles.textarea} />
                         <DropDownPicker
                             open={open}
                             value={categoryValue}
@@ -269,6 +275,7 @@ const styles = StyleSheet.create({
     modalButtonText: { color: "#fff", fontSize: 16 },
     modalCancel: { marginTop: 10 },
     modalCancelText: { color: "#007bff", fontSize: 16 },
+    textarea: { width: "100%", height: 100, borderWidth: 1, borderColor: '#ccc', padding: 10, textAlignVertical: 'top', marginBottom: 8, borderRadius: 8 },
 });
 
 export default AccountScreen;

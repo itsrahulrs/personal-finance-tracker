@@ -15,6 +15,11 @@ const AccountCategoryScreen = ({ navigation }) => {
     const [categoryName, setCategoryName] = useState("");
     const [categoryDescription, setCategoryDescription] = useState("");
     const [nameError, setNameError] = useState("");
+    const [expandedCategory, setExpandedCategory] = useState(null);
+
+    const toggleExpand = (categoryId) => {
+        setExpandedCategory(expandedCategory === categoryId ? null : categoryId);
+    };
 
     useEffect(() => {
         fetchCategories();
@@ -161,21 +166,54 @@ const AccountCategoryScreen = ({ navigation }) => {
             <FlatList
                 data={categories}
                 keyExtractor={(item) => item.id.toString()}
-                renderItem={({ item }) => (
-                    <View style={styles.item}>
-                        <View style={styles.textContainer}>
-                            <Text style={styles.name}>{item.name}</Text>
-                            <Text style={styles.description}>{item.description}</Text>
+                renderItem={({ item }) => {
+                    // Calculate total balance for the category
+                    const totalBalance = item.accounts.reduce((sum, acc) => sum + Number(acc.balance), 0);
+
+                    return (
+                        <View style={styles.item}>
+                            {/* Category Header with Name, Expand Button, Edit, and Delete */}
+                            <View style={styles.header}>
+                                <TouchableOpacity onPress={() => toggleExpand(item.id)}>
+                                    <Text style={styles.name}>{item.name}</Text>
+                                    <Text style={styles.balance}>₹{totalBalance.toLocaleString()}</Text>
+                                </TouchableOpacity>
+                                <View style={styles.actions}>
+                                    <TouchableOpacity onPress={() => openEditModal(item)}>
+                                        <MaterialIcons name="edit" size={24} color="blue" />
+                                    </TouchableOpacity>
+                                    <TouchableOpacity onPress={() => deleteCategory(item.id)}>
+                                        <MaterialIcons name="delete" size={24} color="red" />
+                                    </TouchableOpacity>
+                                    <TouchableOpacity onPress={() => toggleExpand(item.id)}>
+                                        <MaterialIcons
+                                            name={expandedCategory === item.id ? "expand-less" : "expand-more"}
+                                            size={24}
+                                            color="black"
+                                        />
+                                    </TouchableOpacity>
+                                </View>
+                            </View>
+                            <View style={styles.header}>
+                                <Text style={styles.description}>{item.description}</Text>
+                            </View>
+
+                            {/* Expanded View for Accounts */}
+                            {expandedCategory === item.id && (
+                                <View style={styles.accountContainer}>
+                                    {item.accounts.map((account, index) => (
+                                        <View key={index} style={styles.accountRow}>
+                                            <Text style={styles.accountName}>{account.name}</Text>
+                                            <Text style={styles.accountBalance}>₹{account.balance}</Text>
+                                        </View>
+                                    ))}
+                                </View>
+                            )}
                         </View>
-                        <TouchableOpacity onPress={() => openEditModal(item)}>
-                            <MaterialIcons name="edit" size={24} color="blue" />
-                        </TouchableOpacity>
-                        <TouchableOpacity onPress={() => deleteCategory(item.id)}>
-                            <MaterialIcons name="delete" size={24} color="red" />
-                        </TouchableOpacity>
-                    </View>
-                )}
+                    )
+                }}
             />
+
 
             {/* Add Category Button */}
             <TouchableOpacity style={styles.addButton} onPress={() => {
@@ -201,12 +239,14 @@ const AccountCategoryScreen = ({ navigation }) => {
                             }}
                             style={[styles.input, nameError ? styles.inputError : null]}
                         />
-                        { nameError ? <Text style={styles.errorText}>{nameError}</Text> : null }
+                        {nameError ? <Text style={styles.errorText}>{nameError}</Text> : null}
                         <TextInput
                             placeholder="Description"
+                            multiline={true}
+                            numberOfLines={4}
                             value={categoryDescription}
                             onChangeText={setCategoryDescription}
-                            style={styles.input}
+                            style={styles.textarea}
                         />
                         <TouchableOpacity style={styles.modalButton} onPress={editMode ? updateCategory : addCategory}>
                             <Text style={styles.modalButtonText}>{editMode ? "Update" : "Add"}</Text>
@@ -243,6 +283,49 @@ const styles = StyleSheet.create({
     modalCancelText: { color: "#007bff", fontSize: 16 },
     inputError: { borderColor: "red", borderWidth: 1 },
     errorText: { color: "red", fontSize: 14, marginTop: 2, alignSelf: "flex-start", marginBottom: 15 },
+    textarea: { width: "100%", height: 100, borderWidth: 1, borderColor: '#ccc', padding: 10, textAlignVertical: 'top', marginBottom: 8, borderRadius: 8 },
+    item: {
+        padding: 10,
+        marginVertical: 5,
+        backgroundColor: "#f9f9f9",
+        borderRadius: 8,
+        elevation: 2,
+    },
+    header: {
+        flexDirection: "row",
+        justifyContent: "space-between",
+        alignItems: "center",
+        paddingVertical: 5,
+    },
+    name: {
+        fontSize: 18,
+        fontWeight: "bold",
+    },
+    accountContainer: {
+        marginTop: 10,
+        paddingHorizontal: 10,
+    },
+    accountRow: {
+        flexDirection: "row",
+        justifyContent: "space-between",
+        paddingVertical: 5,
+        borderBottomWidth: 1,
+        borderColor: "#ddd",
+    },
+    accountName: {
+        fontSize: 16,
+    },
+    accountBalance: {
+        fontSize: 16,
+        fontWeight: "bold",
+        color: "green",
+    },
+    actions: {
+        flexDirection: "row",
+        justifyContent: "flex-end",
+        marginTop: 10,
+    },
+
 });
 
 export default AccountCategoryScreen;
