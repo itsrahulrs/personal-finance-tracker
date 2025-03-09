@@ -9,6 +9,7 @@ import RegisterScreen from "./screens/RegisterScreen";
 import { Text } from "react-native";
 import AccountScreen from "./screens/Account/AccountScreen";
 import AccountCategoryScreen from "./screens/Account/AccountCategory/AccountCategoryScreen";
+import CategoryScreen from "./screens/CategoryScreen";
 // import AccountScreen from "./screens/Account/AccountScreen";
 
 const Stack = createStackNavigator();
@@ -18,6 +19,7 @@ export default function App() {
   const [loading, setLoading] = useState(true);
   const [menuVisible, setMenuVisible] = useState(false);
   const [accountSubmenuVisible, setAccountSubmenuVisible] = useState(false);
+  const [transactionSubmenuVisible, setTransactionSubmenuVisible] = useState(false);
 
   useEffect(() => {
     const checkAuthToken = async () => {
@@ -116,6 +118,18 @@ export default function App() {
             >
               {(props) => <AccountCategoryScreen {...props} onLogout={logout} />}
             </Stack.Screen>
+            <Stack.Screen
+              name="Category"
+              options={{
+                headerLeft: ({ navigation }) => (
+                  <TouchableOpacity onPress={() => setMenuVisible(true)} style={{ marginLeft: 15 }}>
+                    <Text style={{ fontSize: 18, fontWeight: "bold" }}>☰</Text>
+                  </TouchableOpacity>
+                ),
+              }}
+            >
+              {(props) => <CategoryScreen {...props} onLogout={logout} />}
+            </Stack.Screen>
           </>
         ) : (
           <>
@@ -151,6 +165,24 @@ export default function App() {
                 </TouchableOpacity>
                 <TouchableOpacity onPress={() => { setMenuVisible(false); navigationRef.current?.navigate("AccountCategory"); }}>
                   <Text style={styles.submenuItem}>Account Category</Text>
+                </TouchableOpacity>
+              </View>
+            )}
+
+            {/* Account Menu with Submenu */}
+            <TouchableOpacity onPress={() => setTransactionSubmenuVisible(!transactionSubmenuVisible)}>
+              <Text style={styles.sidebarItem}>
+                Transactions {transactionSubmenuVisible ? "▼" : "▶"}
+              </Text>
+            </TouchableOpacity>
+
+            {transactionSubmenuVisible && (
+              <View style={styles.submenu}>
+                <TouchableOpacity onPress={() => { setMenuVisible(false); navigationRef.current?.navigate("Transaction"); }}>
+                  <Text style={styles.submenuItem}>Transaction</Text>
+                </TouchableOpacity>
+                <TouchableOpacity onPress={() => { setMenuVisible(false); navigationRef.current?.navigate("Category"); }}>
+                  <Text style={styles.submenuItem}>Category</Text>
                 </TouchableOpacity>
               </View>
             )}
