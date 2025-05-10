@@ -6,6 +6,7 @@ use App\Http\Controllers\SavingsGoalController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\CreditCardReminderController;
+use App\Http\Controllers\FamilyAccountController;
 use App\Http\Controllers\RecurringTransactionController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\TransactionController;
@@ -73,5 +74,6 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::apiResource('/savings-goals', SavingsGoalController::class);
     Route::apiResource('/credit-card-reminders', CreditCardReminderController::class);
     Route::apiResource('/recurring-transactions', RecurringTransactionController::class);
+    Route::apiResource('/family-accounts', FamilyAccountController::class);
     Route::middleware('auth:sanctum')->get('/reports', [ReportController::class, 'index']);
 });
