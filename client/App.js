@@ -10,6 +10,7 @@ import { Text } from "react-native";
 import AccountScreen from "./screens/Account/AccountScreen";
 import AccountCategoryScreen from "./screens/Account/AccountCategory/AccountCategoryScreen";
 import CategoryScreen from "./screens/CategoryScreen";
+import TransactionScreen from "./screens/TransactionScreen";
 // import AccountScreen from "./screens/Account/AccountScreen";
 
 const Stack = createStackNavigator();
@@ -129,6 +130,18 @@ export default function App() {
               }}
             >
               {(props) => <CategoryScreen {...props} onLogout={logout} />}
+            </Stack.Screen>
+            <Stack.Screen
+              name="Transaction"
+              options={{
+                headerLeft: ({ navigation }) => (
+                  <TouchableOpacity onPress={() => setMenuVisible(true)} style={{ marginLeft: 15 }}>
+                    <Text style={{ fontSize: 18, fontWeight: "bold" }}>☰</Text>
+                  </TouchableOpacity>
+                ),
+              }}
+            >
+              {(props) => <TransactionScreen {...props} onLogout={logout} />}
             </Stack.Screen>
           </>
         ) : (
