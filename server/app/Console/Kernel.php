@@ -13,6 +13,7 @@ class Kernel extends ConsoleKernel
     protected function schedule(Schedule $schedule): void
     {
         $schedule->command('reminders:credit-card')->dailyAt('09:00');
+        $schedule->command('generate:recurring-transactions')->daily();
     }
 
     /**
