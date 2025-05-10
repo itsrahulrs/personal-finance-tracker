@@ -19,4 +19,9 @@ class CreditCardReminder extends Model
         'due_date',
         'reminder_sent'
     ];
+    
+    public function user()
+    {
+        return $this->belongsTo(User::class);
+    }
 }
