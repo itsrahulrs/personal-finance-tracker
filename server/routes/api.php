@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\AccountCategoryController;
 use App\Http\Controllers\AccountController;
+use App\Http\Controllers\SavingsGoalController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\TransactionController;
@@ -55,7 +56,7 @@ Route::middleware('auth:sanctum')->post('/email/resend', function (Request $requ
     return response()->json(['message'=> 'Verification email sent']);
 })->middleware('auth:sanctum');
 
-Route::middleware(['auth:sanctum', 'verified'])->group(function () {
+Route::middleware(['auth:sanctum'])->group(function () {
     Route::get('/dashboard', function (Request $request) {
         return response()->json([
             'message' => 'Welcome to your dashboard',
@@ -66,4 +67,5 @@ Route::middleware(['auth:sanctum', 'verified'])->group(function () {
     Route::apiResource('/account', AccountController::class);
     Route::apiResource('/category', CategoryController::class);
     Route::apiResource('/transaction', TransactionController::class);
+    Route::apiResource('savings-goals', SavingsGoalController::class);
 });
