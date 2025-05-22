@@ -24,6 +24,7 @@ import AccountScreen from "./screens/Account/AccountScreen";
 import AccountCategoryScreen from "./screens/Account/AccountCategory/AccountCategoryScreen";
 import CategoryScreen from "./screens/CategoryScreen";
 import TransactionScreen from "./screens/TransactionScreen";
+import SavingsGoalScreen from "./screens/SavingsGoalScreen";
 
 const Stack = createStackNavigator();
 
@@ -211,6 +212,22 @@ export default function App() {
               {(props) => <CategoryScreen {...props} onLogout={logout} />}
             </Stack.Screen>
             <Stack.Screen
+              name="SavingsGoal"
+              options={{
+                title: "Savings Goal",
+                headerLeft: ({ navigation }) => (
+                  <TouchableOpacity 
+                    onPress={() => setMenuVisible(true)} 
+                    style={styles.menuButton}
+                  >
+                    <Ionicons name="menu" size={28} color="#6C63FF" />
+                  </TouchableOpacity>
+                ),
+              }}
+            >
+              {(props) => <SavingsGoalScreen {...props} onLogout={logout} />}
+            </Stack.Screen>
+            <Stack.Screen
               name="Transaction"
               options={{
                 title: "Transactions",
@@ -360,6 +377,18 @@ export default function App() {
                 </TouchableOpacity>
               </View>
             )}
+
+            <TouchableOpacity 
+              style={styles.sidebarItemContainer}
+              onPress={() => { 
+                setMenuVisible(false); 
+                navigationRef.current?.navigate("SavingsGoal"); 
+              }}
+              activeOpacity={0.7}
+            >
+              <Ionicons name="home-outline" size={22} color="#6C63FF" style={styles.sidebarIcon} />
+              <Text style={styles.sidebarItem}>Savings Goal</Text>
+            </TouchableOpacity>
 
             <TouchableOpacity 
               style={styles.sidebarItemContainer}
