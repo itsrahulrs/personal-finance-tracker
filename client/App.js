@@ -26,6 +26,7 @@ import CategoryScreen from "./screens/CategoryScreen";
 import TransactionScreen from "./screens/TransactionScreen";
 import SavingsGoalScreen from "./screens/SavingsGoalScreen";
 import CreditCardRemindersScreen from "./screens/CreditCardRemindersScreen";
+import RecurringTransactionsScreen from "./screens/RecurringTransactionScreen";
 
 const Stack = createStackNavigator();
 
@@ -229,6 +230,22 @@ export default function App() {
               {(props) => <CreditCardRemindersScreen {...props} onLogout={logout} />}
             </Stack.Screen>
             <Stack.Screen
+              name="RecurringTransactions"
+              options={{
+                title: "Recurring Transactions",
+                headerLeft: ({ navigation }) => (
+                  <TouchableOpacity 
+                    onPress={() => setMenuVisible(true)} 
+                    style={styles.menuButton}
+                  >
+                    <Ionicons name="menu" size={28} color="#6C63FF" />
+                  </TouchableOpacity>
+                ),
+              }}
+            >
+              {(props) => <RecurringTransactionsScreen {...props} onLogout={logout} />}
+            </Stack.Screen>
+            <Stack.Screen
               name="SavingsGoal"
               options={{
                 title: "Savings Goal",
@@ -417,6 +434,18 @@ export default function App() {
             >
               <Ionicons name="home-outline" size={22} color="#6C63FF" style={styles.sidebarIcon} />
               <Text style={styles.sidebarItem}>Credit Card Reminders</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity 
+              style={styles.sidebarItemContainer}
+              onPress={() => { 
+                setMenuVisible(false); 
+                navigationRef.current?.navigate("RecurringTransactions"); 
+              }}
+              activeOpacity={0.7}
+            >
+              <Ionicons name="home-outline" size={22} color="#6C63FF" style={styles.sidebarIcon} />
+              <Text style={styles.sidebarItem}>Recurring Transactions</Text>
             </TouchableOpacity>
 
             <TouchableOpacity 
