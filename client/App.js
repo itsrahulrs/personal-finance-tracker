@@ -25,6 +25,7 @@ import AccountCategoryScreen from "./screens/Account/AccountCategory/AccountCate
 import CategoryScreen from "./screens/CategoryScreen";
 import TransactionScreen from "./screens/TransactionScreen";
 import SavingsGoalScreen from "./screens/SavingsGoalScreen";
+import CreditCardRemindersScreen from "./screens/CreditCardRemindersScreen";
 
 const Stack = createStackNavigator();
 
@@ -212,6 +213,22 @@ export default function App() {
               {(props) => <CategoryScreen {...props} onLogout={logout} />}
             </Stack.Screen>
             <Stack.Screen
+              name="CreditCardReminders"
+              options={{
+                title: "Credit Card Reminders",
+                headerLeft: ({ navigation }) => (
+                  <TouchableOpacity 
+                    onPress={() => setMenuVisible(true)} 
+                    style={styles.menuButton}
+                  >
+                    <Ionicons name="menu" size={28} color="#6C63FF" />
+                  </TouchableOpacity>
+                ),
+              }}
+            >
+              {(props) => <CreditCardRemindersScreen {...props} onLogout={logout} />}
+            </Stack.Screen>
+            <Stack.Screen
               name="SavingsGoal"
               options={{
                 title: "Savings Goal",
@@ -388,6 +405,18 @@ export default function App() {
             >
               <Ionicons name="home-outline" size={22} color="#6C63FF" style={styles.sidebarIcon} />
               <Text style={styles.sidebarItem}>Savings Goal</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity 
+              style={styles.sidebarItemContainer}
+              onPress={() => { 
+                setMenuVisible(false); 
+                navigationRef.current?.navigate("CreditCardReminders"); 
+              }}
+              activeOpacity={0.7}
+            >
+              <Ionicons name="home-outline" size={22} color="#6C63FF" style={styles.sidebarIcon} />
+              <Text style={styles.sidebarItem}>Credit Card Reminders</Text>
             </TouchableOpacity>
 
             <TouchableOpacity 
