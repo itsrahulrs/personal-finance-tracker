@@ -1,331 +1,709 @@
 import React, { useEffect, useState } from "react";
 import {
-    View, Text, ActivityIndicator, Alert, TouchableOpacity,
-    Modal, TextInput, FlatList, StyleSheet
+  View,
+  Text,
+  ActivityIndicator,
+  Alert,
+  TouchableOpacity,
+  Modal,
+  TextInput,
+  FlatList,
+  StyleSheet,
+  SafeAreaView,
+  StatusBar,
+  KeyboardAvoidingView,
+  Platform,
+  RefreshControl
 } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { MaterialIcons } from "@expo/vector-icons";
+import { MaterialIcons, Ionicons, Feather } from "@expo/vector-icons";
 
 const AccountCategoryScreen = ({ navigation }) => {
-    const [categories, setCategories] = useState([]);
-    const [loading, setLoading] = useState(true);
-    const [modalVisible, setModalVisible] = useState(false);
-    const [editMode, setEditMode] = useState(false);
-    const [selectedCategory, setSelectedCategory] = useState(null);
-    const [categoryName, setCategoryName] = useState("");
-    const [categoryDescription, setCategoryDescription] = useState("");
-    const [nameError, setNameError] = useState("");
-    const [expandedCategory, setExpandedCategory] = useState(null);
+  const [categories, setCategories] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
+  const [modalVisible, setModalVisible] = useState(false);
+  const [editMode, setEditMode] = useState(false);
+  const [selectedCategory, setSelectedCategory] = useState(null);
+  const [categoryName, setCategoryName] = useState("");
+  const [categoryDescription, setCategoryDescription] = useState("");
+  const [nameError, setNameError] = useState("");
+  const [searchQuery, setSearchQuery] = useState("");
+  const [expandedCategory, setExpandedCategory] = useState(null);
 
-    const toggleExpand = (categoryId) => {
-        setExpandedCategory(expandedCategory === categoryId ? null : categoryId);
-    };
+  useEffect(() => {
+    fetchCategories();
+  }, []);
 
-    useEffect(() => {
-        fetchCategories();
-    }, []);
+  const fetchCategories = async () => {
+    try {
+      const token = await AsyncStorage.getItem("authToken");
+      const response = await fetch("http://192.168.31.167:8000/api/account-category", {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}`,
+        },
+      });
 
-    const fetchCategories = async () => {
-        try {
-            const token = await AsyncStorage.getItem("authToken");
-            const response = await fetch("http://192.168.31.167:8000/api/account-category", {
-                method: "GET",
-                headers: {
-                    "Content-Type": "application/json",
-                    "Authorization": `Bearer ${token}`,
-                },
-            });
+      const data = await response.json();
+      if (response.ok) {
+        setCategories(data.data);
+      } else {
+        Alert.alert("Error", data.message || "Failed to load categories.");
+      }
+    } catch (error) {
+      console.error("Fetch Error:", error);
+      Alert.alert("Error", "Network request failed.");
+    } finally {
+      setLoading(false);
+      setRefreshing(false);
+    }
+  };
 
-            const data = await response.json();
-            if (response.ok) {
-                setCategories(data.data);
-            } else {
-                Alert.alert("Error", data.message || "Failed to load categories.");
-            }
-        } catch (error) {
-            console.error("Fetch Error:", error);
-            Alert.alert("Error", "Network request failed.");
-        } finally {
-            setLoading(false);
-        }
-    };
+  const handleRefresh = () => {
+    setRefreshing(true);
+    fetchCategories();
+  };
 
-    const addCategory = async () => {
-        if (!categoryName.trim()) {
-            setNameError("Category name is required.");
-            return;
-        }
+  const toggleExpand = (categoryId) => {
+    setExpandedCategory(expandedCategory === categoryId ? null : categoryId);
+  };
 
-        try {
-            const token = await AsyncStorage.getItem("authToken");
-            const response = await fetch("http://192.168.31.167:8000/api/account-category", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                    "Authorization": `Bearer ${token}`,
-                },
-                body: JSON.stringify({ name: categoryName, description: categoryDescription }),
-            });
+  const filteredCategories = categories.filter(category =>
+    category.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    (category.description && category.description.toLowerCase().includes(searchQuery.toLowerCase()))
+  );
 
-            const data = await response.json();
-            if (response.ok) {
-                setCategories([...categories, data.data]);
-                setCategoryName("");
-                setCategoryDescription("");
-                setModalVisible(false);
-            } else {
-                Alert.alert("Error", data.message || "Failed to add category.");
-            }
-        } catch (error) {
-            console.error("Add Category Error:", error);
-            Alert.alert("Error", "Could not add category.");
-        }
-    };
+  const calculateTotalBalance = (accounts) => {
+    return accounts.reduce((sum, acc) => sum + Number(acc.balance), 0);
+  };
 
-    const updateCategory = async () => {
-        if (!categoryName.trim()) {
-            setNameError("Category name is required.");
-            return;
-        }
-
-        try {
-            const token = await AsyncStorage.getItem("authToken");
-            const response = await fetch(`http://192.168.31.167:8000/api/account-category/${selectedCategory.id}`, {
-                method: "PUT",
-                headers: {
-                    "Content-Type": "application/json",
-                    "Authorization": `Bearer ${token}`,
-                },
-                body: JSON.stringify({ name: categoryName, description: categoryDescription }),
-            });
-
-            const data = await response.json();
-            if (response.ok) {
-                setCategories(categories.map(cat => cat.id === selectedCategory.id ? data.data : cat));
-                setCategoryName("");
-                setCategoryDescription("");
-                setModalVisible(false);
-                setEditMode(false);
-            } else {
-                Alert.alert("Error", data.message || "Failed to update category.");
-            }
-        } catch (error) {
-            console.error("Update Category Error:", error);
-            Alert.alert("Error", "Could not update category.");
-        }
-    };
-
-    const openEditModal = (category) => {
-        setSelectedCategory(category);
-        setCategoryName(category.name);
-        setCategoryDescription(category.description);
-        setEditMode(true);
-        setModalVisible(true);
-    };
-
-    const deleteCategory = async (categoryId) => {
-        Alert.alert("Confirm", "Are you sure you want to delete this category?", [
-            { text: "Cancel", style: "cancel" },
-            {
-                text: "Delete",
-                style: "destructive",
-                onPress: async () => {
-                    try {
-                        const token = await AsyncStorage.getItem("authToken");
-                        const response = await fetch(`http://192.168.31.167:8000/api/account-category/${categoryId}`, {
-                            method: "DELETE",
-                            headers: {
-                                "Authorization": `Bearer ${token}`,
-                            },
-                        });
-
-                        if (response.ok) {
-                            setCategories(categories.filter(cat => cat.id !== categoryId));
-                        } else {
-                            Alert.alert("Error", "Failed to delete category.");
-                        }
-                    } catch (error) {
-                        console.error("Delete Category Error:", error);
-                        Alert.alert("Error", "Could not delete category.");
-                    }
-                }
-            }
-        ]);
-    };
-
-    if (loading) {
-        return (
-            <View style={styles.centered}>
-                <ActivityIndicator size="large" color="#0000ff" />
-            </View>
-        );
+  const addCategory = async () => {
+    if (!categoryName.trim()) {
+      setNameError("Category name is required.");
+      return;
     }
 
+    try {
+      const token = await AsyncStorage.getItem("authToken");
+      const response = await fetch("http://192.168.31.167:8000/api/account-category", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}`,
+        },
+        body: JSON.stringify({ 
+          name: categoryName, 
+          description: categoryDescription 
+        }),
+      });
+
+      const data = await response.json();
+      if (response.ok) {
+        setCategories([...categories, data.data]);
+        resetForm();
+        setModalVisible(false);
+        Alert.alert("Success", "Category added successfully!");
+      } else {
+        Alert.alert("Error", data.message || "Failed to add category.");
+      }
+    } catch (error) {
+      console.error("Add Category Error:", error);
+      Alert.alert("Error", "Could not add category.");
+    }
+  };
+
+  const updateCategory = async () => {
+    if (!categoryName.trim()) {
+      setNameError("Category name is required.");
+      return;
+    }
+
+    try {
+      const token = await AsyncStorage.getItem("authToken");
+      const response = await fetch(
+        `http://192.168.31.167:8000/api/account-category/${selectedCategory.id}`,
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${token}`,
+          },
+          body: JSON.stringify({ 
+            name: categoryName, 
+            description: categoryDescription 
+          }),
+        }
+      );
+
+      const data = await response.json();
+      if (response.ok) {
+        setCategories(
+          categories.map((cat) =>
+            cat.id === selectedCategory.id ? data.data : cat
+          )
+        );
+        resetForm();
+        setModalVisible(false);
+        setEditMode(false);
+        Alert.alert("Success", "Category updated successfully!");
+      } else {
+        Alert.alert("Error", data.message || "Failed to update category.");
+      }
+    } catch (error) {
+      console.error("Update Category Error:", error);
+      Alert.alert("Error", "Could not update category.");
+    }
+  };
+
+  const resetForm = () => {
+    setCategoryName("");
+    setCategoryDescription("");
+    setNameError("");
+  };
+
+  const openEditModal = (category) => {
+    setSelectedCategory(category);
+    setCategoryName(category.name);
+    setCategoryDescription(category.description || "");
+    setEditMode(true);
+    setModalVisible(true);
+  };
+
+  const deleteCategory = async (categoryId) => {
+    Alert.alert(
+      "Delete Category",
+      "Are you sure you want to delete this category and all its accounts?",
+      [
+        { text: "Cancel", style: "cancel" },
+        {
+          text: "Delete",
+          style: "destructive",
+          onPress: async () => {
+            try {
+              const token = await AsyncStorage.getItem("authToken");
+              const response = await fetch(
+                `http://192.168.31.167:8000/api/account-category/${categoryId}`,
+                {
+                  method: "DELETE",
+                  headers: {
+                    "Authorization": `Bearer ${token}`,
+                  },
+                }
+              );
+
+              if (response.ok) {
+                setCategories(categories.filter((cat) => cat.id !== categoryId));
+                Alert.alert("Success", "Category deleted successfully!");
+              } else {
+                Alert.alert("Error", "Failed to delete category.");
+              }
+            } catch (error) {
+              console.error("Delete Category Error:", error);
+              Alert.alert("Error", "Could not delete category.");
+            }
+          },
+        },
+      ]
+    );
+  };
+
+  const navigateToAccount = (account) => {
+    navigation.navigate('Account', { accountId: account.id });
+  };
+
+  if (loading) {
     return (
-        <View style={styles.container}>
-            <FlatList
-                data={categories}
-                keyExtractor={(item) => item.id.toString()}
-                renderItem={({ item }) => {
-                    // Calculate total balance for the category
-                    const totalBalance = item.accounts.reduce((sum, acc) => sum + Number(acc.balance), 0);
+      <SafeAreaView style={styles.loadingContainer}>
+        <ActivityIndicator size="large" color="#6C63FF" />
+      </SafeAreaView>
+    );
+  }
 
-                    return (
-                        <View style={styles.item}>
-                            {/* Category Header with Name, Expand Button, Edit, and Delete */}
-                            <View style={styles.header}>
-                                <TouchableOpacity onPress={() => toggleExpand(item.id)}>
-                                    <Text style={styles.name}>{item.name}</Text>
-                                    <Text style={styles.balance}>₹{totalBalance.toLocaleString()}</Text>
-                                </TouchableOpacity>
-                                <View style={styles.actions}>
-                                    <TouchableOpacity onPress={() => openEditModal(item)}>
-                                        <MaterialIcons name="edit" size={24} color="blue" />
-                                    </TouchableOpacity>
-                                    <TouchableOpacity onPress={() => deleteCategory(item.id)}>
-                                        <MaterialIcons name="delete" size={24} color="red" />
-                                    </TouchableOpacity>
-                                    <TouchableOpacity onPress={() => toggleExpand(item.id)}>
-                                        <MaterialIcons
-                                            name={expandedCategory === item.id ? "expand-less" : "expand-more"}
-                                            size={24}
-                                            color="black"
-                                        />
-                                    </TouchableOpacity>
-                                </View>
-                            </View>
-                            <View style={styles.header}>
-                                <Text style={styles.description}>{item.description}</Text>
-                            </View>
+  return (
+    <SafeAreaView style={styles.container}>
+      <StatusBar barStyle="dark-content" backgroundColor="#fff" />
+      
+      {/* Header */}
+      <View style={styles.header}>
+        <Text style={styles.headerTitle}>Account Categories</Text>
+        <TouchableOpacity
+          style={styles.addButton}
+          onPress={() => {
+            setEditMode(false);
+            resetForm();
+            setModalVisible(true);
+          }}
+        >
+          <Ionicons name="add" size={24} color="#fff" />
+        </TouchableOpacity>
+      </View>
 
-                            {/* Expanded View for Accounts */}
-                            {expandedCategory === item.id && (
-                                <View style={styles.accountContainer}>
-                                    {item.accounts.map((account, index) => (
-                                        <View key={index} style={styles.accountRow}>
-                                            <Text style={styles.accountName}>{account.name}</Text>
-                                            <Text style={styles.accountBalance}>₹{account.balance}</Text>
-                                        </View>
-                                    ))}
-                                </View>
-                            )}
-                        </View>
-                    )
-                }}
+      {/* Search Bar */}
+      <View style={styles.searchContainer}>
+        <Ionicons name="search" size={20} color="#999" style={styles.searchIcon} />
+        <TextInput
+          style={styles.searchInput}
+          placeholder="Search categories..."
+          value={searchQuery}
+          onChangeText={setSearchQuery}
+          placeholderTextColor="#999"
+        />
+        {searchQuery ? (
+          <TouchableOpacity onPress={() => setSearchQuery("")}>
+            <Ionicons name="close-circle" size={20} color="#999" />
+          </TouchableOpacity>
+        ) : null}
+      </View>
+
+      {/* Categories List */}
+      {filteredCategories.length > 0 ? (
+        <FlatList
+          data={filteredCategories}
+          keyExtractor={(item) => item.id.toString()}
+          renderItem={({ item }) => {
+            const totalBalance = calculateTotalBalance(item.accounts);
+            return (
+              <View style={styles.categoryCard}>
+                <TouchableOpacity 
+                  onPress={() => toggleExpand(item.id)}
+                  style={styles.categoryHeader}
+                >
+                  <View style={styles.categoryInfo}>
+                    <View style={[styles.categoryIcon, { backgroundColor: '#6C63FF20' }]}>
+                      <MaterialIcons name="category" size={24} color="#6C63FF" />
+                    </View>
+                    <View style={styles.categoryText}>
+                      <Text style={styles.categoryName}>{item.name}</Text>
+                      <Text style={styles.categoryBalance}>
+                        ₹{totalBalance.toLocaleString('en-IN')}
+                      </Text>
+                    </View>
+                  </View>
+                  <MaterialIcons
+                    name={expandedCategory === item.id ? "expand-less" : "expand-more"}
+                    size={24}
+                    color="#6C63FF"
+                  />
+                </TouchableOpacity>
+
+                {item.description ? (
+                  <Text style={styles.categoryDescription}>{item.description}</Text>
+                ) : null}
+
+                <View style={styles.categoryActions}>
+                  <TouchableOpacity 
+                    onPress={() => openEditModal(item)}
+                    style={styles.actionButton}
+                  >
+                    <Feather name="edit" size={20} color="#6C63FF" />
+                    <Text style={styles.actionText}>Edit</Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity 
+                    onPress={() => deleteCategory(item.id)}
+                    style={styles.actionButton}
+                  >
+                    <Feather name="trash-2" size={20} color="#ff4444" />
+                    <Text style={[styles.actionText, { color: '#ff4444' }]}>Delete</Text>
+                  </TouchableOpacity>
+                </View>
+
+                {/* Expanded Accounts List */}
+                {expandedCategory === item.id && (
+                  <View style={styles.accountsContainer}>
+                    {item.accounts.length > 0 ? (
+                      item.accounts.map((account) => (
+                        <TouchableOpacity
+                          key={account.id}
+                          style={styles.accountItem}
+                          onPress={() => navigateToAccount(account)}
+                        >
+                          <View style={styles.accountInfo}>
+                            <View style={[styles.accountIcon, { backgroundColor: '#4CAF5020' }]}>
+                              <Ionicons name="wallet-outline" size={20} color="#4CAF50" />
+                            </View>
+                            <Text style={styles.accountName}>{account.name}</Text>
+                          </View>
+                          <Text style={[
+                            styles.accountBalance,
+                            account.balance >= 0 ? styles.positiveBalance : styles.negativeBalance
+                          ]}>
+                            ₹{Number(account.balance).toLocaleString('en-IN')}
+                          </Text>
+                        </TouchableOpacity>
+                      ))
+                    ) : (
+                      <View style={styles.noAccounts}>
+                        <Text style={styles.noAccountsText}>No accounts in this category</Text>
+                      </View>
+                    )}
+                  </View>
+                )}
+              </View>
+            );
+          }}
+          refreshControl={
+            <RefreshControl
+              refreshing={refreshing}
+              onRefresh={handleRefresh}
+              colors={['#6C63FF']}
+              tintColor="#6C63FF"
+            />
+          }
+          contentContainerStyle={styles.listContent}
+        />
+      ) : (
+        <View style={styles.emptyContainer}>
+          <Ionicons name="folder-open" size={50} color="#6C63FF" />
+          <Text style={styles.emptyText}>No account categories found</Text>
+          <Text style={styles.emptySubtext}>Add a new category to get started</Text>
+        </View>
+      )}
+
+      {/* Add/Edit Category Modal */}
+      <Modal
+        transparent={true}
+        visible={modalVisible}
+        animationType="slide"
+        onRequestClose={() => setModalVisible(false)}
+      >
+        <KeyboardAvoidingView
+          behavior={Platform.OS === "ios" ? "padding" : "height"}
+          style={styles.modalContainer}
+        >
+          <TouchableOpacity
+            style={styles.modalOverlay}
+            activeOpacity={1}
+            onPress={() => setModalVisible(false)}
+          />
+          <View style={styles.modalContent}>
+            <Text style={styles.modalTitle}>
+              {editMode ? "Edit Category" : "Add New Category"}
+            </Text>
+            
+            <Text style={styles.inputLabel}>Category Name *</Text>
+            <TextInput
+              placeholder="Enter category name"
+              placeholderTextColor="#999"
+              value={categoryName}
+              onChangeText={(text) => {
+                setCategoryName(text);
+                if (text.trim()) setNameError("");
+              }}
+              style={[
+                styles.modalInput,
+                nameError ? styles.inputError : null,
+              ]}
+              autoFocus
+            />
+            {nameError ? (
+              <Text style={styles.errorText}>{nameError}</Text>
+            ) : null}
+
+            <Text style={styles.inputLabel}>Description</Text>
+            <TextInput
+              placeholder="Enter description (optional)"
+              placeholderTextColor="#999"
+              multiline={true}
+              numberOfLines={3}
+              value={categoryDescription}
+              onChangeText={setCategoryDescription}
+              style={[styles.modalInput, styles.descriptionInput]}
             />
 
-
-            {/* Add Category Button */}
-            <TouchableOpacity style={styles.addButton} onPress={() => {
-                setEditMode(false);
-                setCategoryName("");
-                setCategoryDescription("");
-                setModalVisible(true);
-            }}>
-                <Text style={styles.addButtonText}>+ Add Category</Text>
-            </TouchableOpacity>
-
-            {/* Add/Edit Category Modal */}
-            <Modal transparent={true} visible={modalVisible} animationType="slide">
-                <View style={styles.overlay}>
-                    <View style={styles.modal}>
-                        <Text style={styles.modalTitle}>{editMode ? "Edit Category" : "Add Category"}</Text>
-                        <TextInput
-                            placeholder="Name"
-                            value={categoryName}
-                            onChangeText={(text) => {
-                                setCategoryName(text);
-                                if (text.trim()) setNameError(""); // Clear error when user types
-                            }}
-                            style={[styles.input, nameError ? styles.inputError : null]}
-                        />
-                        {nameError ? <Text style={styles.errorText}>{nameError}</Text> : null}
-                        <TextInput
-                            placeholder="Description"
-                            multiline={true}
-                            numberOfLines={4}
-                            value={categoryDescription}
-                            onChangeText={setCategoryDescription}
-                            style={styles.textarea}
-                        />
-                        <TouchableOpacity style={styles.modalButton} onPress={editMode ? updateCategory : addCategory}>
-                            <Text style={styles.modalButtonText}>{editMode ? "Update" : "Add"}</Text>
-                        </TouchableOpacity>
-                        <TouchableOpacity style={styles.modalCancel} onPress={() => setModalVisible(false)}>
-                            <Text style={styles.modalCancelText}>Cancel</Text>
-                        </TouchableOpacity>
-                    </View>
-                </View>
-            </Modal>
-        </View>
-    );
+            <View style={styles.modalButtons}>
+              <TouchableOpacity
+                style={[styles.modalButton, styles.cancelButton]}
+                onPress={() => setModalVisible(false)}
+              >
+                <Text style={styles.cancelButtonText}>Cancel</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={[styles.modalButton, styles.submitButton]}
+                onPress={editMode ? updateCategory : addCategory}
+              >
+                <Text style={styles.submitButtonText}>
+                  {editMode ? "Update" : "Add"}
+                </Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </KeyboardAvoidingView>
+      </Modal>
+    </SafeAreaView>
+  );
 };
 
 const styles = StyleSheet.create({
-    container: { flex: 1, padding: 20 },
-    centered: { flex: 1, justifyContent: "center", alignItems: "center" },
-    item: {
-        flexDirection: "row", justifyContent: "space-between", alignItems: "center",
-        padding: 15, backgroundColor: "#f9f9f9", marginVertical: 5, borderRadius: 8, elevation: 3
-    },
-    textContainer: { flex: 1 },
-    name: { fontSize: 18, fontWeight: "bold" },
-    description: { fontSize: 14, color: "gray" },
-    addButton: { backgroundColor: "#007bff", padding: 15, alignItems: "center", borderRadius: 8, marginTop: 10 },
-    addButtonText: { color: "#fff", fontSize: 16, fontWeight: "bold" },
-    overlay: { flex: 1, justifyContent: "center", alignItems: "center", backgroundColor: "rgba(0,0,0,0.3)" },
-    modal: { backgroundColor: "#fff", padding: 20, borderRadius: 10, width: 300, elevation: 5, alignItems: "center" },
-    modalTitle: { fontSize: 18, fontWeight: "bold", marginBottom: 10 },
-    input: { width: "100%", padding: 10, borderWidth: 1, borderColor: "#ccc", borderRadius: 8, marginBottom: 10 },
-    modalButton: { backgroundColor: "#28a745", padding: 10, borderRadius: 8, width: "100%", alignItems: "center" },
-    modalButtonText: { color: "#fff", fontSize: 16 },
-    modalCancel: { marginTop: 10 },
-    modalCancelText: { color: "#007bff", fontSize: 16 },
-    inputError: { borderColor: "red", borderWidth: 1 },
-    errorText: { color: "red", fontSize: 14, marginTop: 2, alignSelf: "flex-start", marginBottom: 15 },
-    textarea: { width: "100%", height: 100, borderWidth: 1, borderColor: '#ccc', padding: 10, textAlignVertical: 'top', marginBottom: 8, borderRadius: 8 },
-    item: {
-        padding: 10,
-        marginVertical: 5,
-        backgroundColor: "#f9f9f9",
-        borderRadius: 8,
-        elevation: 2,
-    },
-    header: {
-        flexDirection: "row",
-        justifyContent: "space-between",
-        alignItems: "center",
-        paddingVertical: 5,
-    },
-    name: {
-        fontSize: 18,
-        fontWeight: "bold",
-    },
-    accountContainer: {
-        marginTop: 10,
-        paddingHorizontal: 10,
-    },
-    accountRow: {
-        flexDirection: "row",
-        justifyContent: "space-between",
-        paddingVertical: 5,
-        borderBottomWidth: 1,
-        borderColor: "#ddd",
-    },
-    accountName: {
-        fontSize: 16,
-    },
-    accountBalance: {
-        fontSize: 16,
-        fontWeight: "bold",
-        color: "green",
-    },
-    actions: {
-        flexDirection: "row",
-        justifyContent: "flex-end",
-        marginTop: 10,
-    },
-
+  container: {
+    flex: 1,
+    backgroundColor: "#f8f9fa",
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "#fff",
+  },
+  header: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    padding: 20,
+    paddingBottom: 10,
+    backgroundColor: "#fff",
+  },
+  headerTitle: {
+    fontSize: 24,
+    fontWeight: "bold",
+    color: "#333",
+  },
+  addButton: {
+    backgroundColor: "#6C63FF",
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  searchContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#fff",
+    borderRadius: 10,
+    paddingHorizontal: 15,
+    paddingVertical: 8,
+    marginHorizontal: 20,
+    marginBottom: 15,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 2,
+  },
+  searchIcon: {
+    marginRight: 10,
+  },
+  searchInput: {
+    flex: 1,
+    height: 40,
+    fontSize: 16,
+    color: "#333",
+  },
+  listContent: {
+    paddingHorizontal: 20,
+    paddingBottom: 20,
+  },
+  categoryCard: {
+    backgroundColor: "#fff",
+    borderRadius: 12,
+    padding: 15,
+    marginBottom: 12,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 2,
+  },
+  categoryHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 10,
+  },
+  categoryInfo: {
+    flexDirection: "row",
+    alignItems: "center",
+    flex: 1,
+  },
+  categoryIcon: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    justifyContent: "center",
+    alignItems: "center",
+    marginRight: 15,
+  },
+  categoryText: {
+    flex: 1,
+  },
+  categoryName: {
+    fontSize: 16,
+    fontWeight: "600",
+    color: "#333",
+  },
+  categoryBalance: {
+    fontSize: 14,
+    color: "#6C63FF",
+    fontWeight: "bold",
+    marginTop: 3,
+  },
+  categoryDescription: {
+    fontSize: 14,
+    color: "#666",
+    marginBottom: 10,
+    paddingLeft: 55, // Align with category name
+  },
+  categoryActions: {
+    flexDirection: "row",
+    justifyContent: "flex-end",
+    marginTop: 5,
+  },
+  actionButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginLeft: 15,
+    padding: 5,
+  },
+  actionText: {
+    fontSize: 14,
+    marginLeft: 5,
+  },
+  accountsContainer: {
+    marginTop: 10,
+    borderTopWidth: 1,
+    borderTopColor: "#eee",
+    paddingTop: 10,
+  },
+  accountItem: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    paddingVertical: 12,
+    paddingHorizontal: 5,
+  },
+  accountInfo: {
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  accountIcon: {
+    width: 30,
+    height: 30,
+    borderRadius: 15,
+    justifyContent: "center",
+    alignItems: "center",
+    marginRight: 10,
+  },
+  accountName: {
+    fontSize: 15,
+    color: "#333",
+  },
+  accountBalance: {
+    fontSize: 15,
+    fontWeight: "600",
+  },
+  positiveBalance: {
+    color: "#4CAF50",
+  },
+  negativeBalance: {
+    color: "#F44336",
+  },
+  noAccounts: {
+    paddingVertical: 15,
+    alignItems: "center",
+  },
+  noAccountsText: {
+    color: "#999",
+    fontSize: 14,
+  },
+  emptyContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    padding: 40,
+  },
+  emptyText: {
+    fontSize: 18,
+    color: "#333",
+    marginTop: 15,
+    textAlign: "center",
+  },
+  emptySubtext: {
+    fontSize: 14,
+    color: "#666",
+    marginTop: 5,
+    textAlign: "center",
+  },
+  modalContainer: {
+    flex: 1,
+    justifyContent: "flex-end",
+  },
+  modalOverlay: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: "rgba(0,0,0,0.5)",
+  },
+  modalContent: {
+    backgroundColor: "#fff",
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+    padding: 25,
+    paddingBottom: 30,
+  },
+  modalTitle: {
+    fontSize: 20,
+    fontWeight: "bold",
+    color: "#333",
+    marginBottom: 20,
+    textAlign: "center",
+  },
+  inputLabel: {
+    fontSize: 14,
+    color: "#666",
+    marginBottom: 8,
+    marginTop: 15,
+  },
+  modalInput: {
+    backgroundColor: "#f8f9fa",
+    borderRadius: 10,
+    padding: 15,
+    fontSize: 16,
+    color: "#333",
+    borderWidth: 1,
+    borderColor: "#eee",
+  },
+  descriptionInput: {
+    height: 100,
+    textAlignVertical: "top",
+  },
+  inputError: {
+    borderColor: "#ff4444",
+  },
+  errorText: {
+    color: "#ff4444",
+    fontSize: 14,
+    marginTop: 5,
+  },
+  modalButtons: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    marginTop: 25,
+  },
+  modalButton: {
+    flex: 1,
+    borderRadius: 10,
+    padding: 15,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  cancelButton: {
+    backgroundColor: "#f8f9fa",
+    marginRight: 10,
+  },
+  cancelButtonText: {
+    color: "#333",
+    fontSize: 16,
+    fontWeight: "600",
+  },
+  submitButton: {
+    backgroundColor: "#6C63FF",
+    marginLeft: 10,
+  },
+  submitButtonText: {
+    color: "#fff",
+    fontSize: 16,
+    fontWeight: "600",
+  },
 });
 
 export default AccountCategoryScreen;
