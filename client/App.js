@@ -1,17 +1,29 @@
 import React, { useEffect, useState } from "react";
-import { View, ActivityIndicator, Alert, Modal, TouchableOpacity, StyleSheet } from "react-native";
+import { 
+  View, 
+  ActivityIndicator, 
+  Alert, 
+  Modal, 
+  TouchableOpacity, 
+  StyleSheet, 
+  Text,
+  Animated,
+  Easing,
+  Platform,
+  StatusBar,
+  SafeAreaView
+} from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { createStackNavigator } from "@react-navigation/stack";
 import { createNavigationContainerRef, NavigationContainer } from "@react-navigation/native";
+import { Ionicons, MaterialIcons } from "@expo/vector-icons";
 import HomeScreen from "./screens/HomeScreen";
 import LoginScreen from "./screens/LoginScreen";
 import RegisterScreen from "./screens/RegisterScreen";
-import { Text } from "react-native";
 import AccountScreen from "./screens/Account/AccountScreen";
 import AccountCategoryScreen from "./screens/Account/AccountCategory/AccountCategoryScreen";
 import CategoryScreen from "./screens/CategoryScreen";
 import TransactionScreen from "./screens/TransactionScreen";
-// import AccountScreen from "./screens/Account/AccountScreen";
 
 const Stack = createStackNavigator();
 
@@ -21,6 +33,10 @@ export default function App() {
   const [menuVisible, setMenuVisible] = useState(false);
   const [accountSubmenuVisible, setAccountSubmenuVisible] = useState(false);
   const [transactionSubmenuVisible, setTransactionSubmenuVisible] = useState(false);
+  
+  // Animation values
+  const sidebarPosition = new Animated.Value(-300);
+  const overlayOpacity = new Animated.Value(0);
 
   useEffect(() => {
     const checkAuthToken = async () => {
@@ -32,7 +48,38 @@ export default function App() {
     checkAuthToken();
   }, []);
 
-  // ✅ Logout function (removes token and redirects to login)
+  useEffect(() => {
+    if (menuVisible) {
+      Animated.parallel([
+        Animated.timing(sidebarPosition, {
+          toValue: 0,
+          duration: 300,
+          easing: Easing.out(Easing.ease),
+          useNativeDriver: true,
+        }),
+        Animated.timing(overlayOpacity, {
+          toValue: 0.5,
+          duration: 300,
+          useNativeDriver: true,
+        }),
+      ]).start();
+    } else {
+      Animated.parallel([
+        Animated.timing(sidebarPosition, {
+          toValue: -300,
+          duration: 200,
+          easing: Easing.in(Easing.ease),
+          useNativeDriver: true,
+        }),
+        Animated.timing(overlayOpacity, {
+          toValue: 0,
+          duration: 200,
+          useNativeDriver: true,
+        }),
+      ]).start();
+    }
+  }, [menuVisible]);
+
   const logout = async () => {
     try {
       const token = await AsyncStorage.getItem("authToken");
@@ -54,6 +101,7 @@ export default function App() {
         await AsyncStorage.removeItem("authToken");
         Alert.alert("Success", "Logged out successfully!");
         setIsAuthenticated(false);
+        setMenuVisible(false);
       } else {
         const data = await response.json();
         Alert.alert("Error", data.message || "Logout failed");
@@ -64,31 +112,50 @@ export default function App() {
     }
   };
 
-
-  // ✅ Login function (sets token state after successful login)
   const login = async () => {
     setIsAuthenticated(true);
   };
 
   if (loading) {
     return (
-      <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
-        <ActivityIndicator size="large" color="#0000ff" />
-      </View>
+      <SafeAreaView style={styles.loadingContainer}>
+        <ActivityIndicator size="large" color="#6C63FF" />
+        <Text style={styles.loadingText}>Loading...</Text>
+      </SafeAreaView>
     );
   }
 
   return (
     <NavigationContainer ref={navigationRef}>
-      <Stack.Navigator>
+      <StatusBar barStyle="dark-content" backgroundColor="#fff" />
+      
+      <Stack.Navigator
+        screenOptions={{
+          headerStyle: {
+            backgroundColor: "#fff",
+            elevation: 0,
+            shadowOpacity: 0,
+            borderBottomWidth: 0,
+          },
+          headerTitleStyle: {
+            color: "#333",
+            fontWeight: "600",
+          },
+          headerTintColor: "#6C63FF",
+        }}
+      >
         {isAuthenticated ? (
           <>
             <Stack.Screen
               name="Home"
               options={{
+                title: "Dashboard",
                 headerLeft: ({ navigation }) => (
-                  <TouchableOpacity onPress={() => setMenuVisible(true)} style={{ marginLeft: 15 }}>
-                    <Text style={{ fontSize: 18, fontWeight: "bold" }}>☰</Text>
+                  <TouchableOpacity 
+                    onPress={() => setMenuVisible(true)} 
+                    style={styles.menuButton}
+                  >
+                    <Ionicons name="menu" size={28} color="#6C63FF" />
                   </TouchableOpacity>
                 ),
               }}
@@ -98,9 +165,13 @@ export default function App() {
             <Stack.Screen
               name="Account"
               options={{
+                title: "Accounts",
                 headerLeft: ({ navigation }) => (
-                  <TouchableOpacity onPress={() => setMenuVisible(true)} style={{ marginLeft: 15 }}>
-                    <Text style={{ fontSize: 18, fontWeight: "bold" }}>☰</Text>
+                  <TouchableOpacity 
+                    onPress={() => setMenuVisible(true)} 
+                    style={styles.menuButton}
+                  >
+                    <Ionicons name="menu" size={28} color="#6C63FF" />
                   </TouchableOpacity>
                 ),
               }}
@@ -110,9 +181,13 @@ export default function App() {
             <Stack.Screen
               name="AccountCategory"
               options={{
+                title: "Account Categories",
                 headerLeft: ({ navigation }) => (
-                  <TouchableOpacity onPress={() => setMenuVisible(true)} style={{ marginLeft: 15 }}>
-                    <Text style={{ fontSize: 18, fontWeight: "bold" }}>☰</Text>
+                  <TouchableOpacity 
+                    onPress={() => setMenuVisible(true)} 
+                    style={styles.menuButton}
+                  >
+                    <Ionicons name="menu" size={28} color="#6C63FF" />
                   </TouchableOpacity>
                 ),
               }}
@@ -122,9 +197,13 @@ export default function App() {
             <Stack.Screen
               name="Category"
               options={{
+                title: "Categories",
                 headerLeft: ({ navigation }) => (
-                  <TouchableOpacity onPress={() => setMenuVisible(true)} style={{ marginLeft: 15 }}>
-                    <Text style={{ fontSize: 18, fontWeight: "bold" }}>☰</Text>
+                  <TouchableOpacity 
+                    onPress={() => setMenuVisible(true)} 
+                    style={styles.menuButton}
+                  >
+                    <Ionicons name="menu" size={28} color="#6C63FF" />
                   </TouchableOpacity>
                 ),
               }}
@@ -134,9 +213,13 @@ export default function App() {
             <Stack.Screen
               name="Transaction"
               options={{
+                title: "Transactions",
                 headerLeft: ({ navigation }) => (
-                  <TouchableOpacity onPress={() => setMenuVisible(true)} style={{ marginLeft: 15 }}>
-                    <Text style={{ fontSize: 18, fontWeight: "bold" }}>☰</Text>
+                  <TouchableOpacity 
+                    onPress={() => setMenuVisible(true)} 
+                    style={styles.menuButton}
+                  >
+                    <Ionicons name="menu" size={28} color="#6C63FF" />
                   </TouchableOpacity>
                 ),
               }}
@@ -146,81 +229,232 @@ export default function App() {
           </>
         ) : (
           <>
-            <Stack.Screen name="Login">
+            <Stack.Screen 
+              name="Login" 
+              options={{ headerShown: false }}
+            >
               {(props) => <LoginScreen {...props} onLogin={login} />}
             </Stack.Screen>
-            <Stack.Screen name="Register" component={RegisterScreen} />
+            <Stack.Screen 
+              name="Register" 
+              options={{ headerShown: false }} 
+              component={RegisterScreen} 
+            />
           </>
         )}
       </Stack.Navigator>
 
       {/* Sidebar Menu Modal */}
-      <Modal transparent={true} visible={menuVisible} animationType="fade">
-        <TouchableOpacity style={styles.overlay} onPress={() => setMenuVisible(false)}>
-          <View style={styles.sidebar}>
-            <Text style={styles.sidebarTitle}>Menu</Text>
+      <Modal transparent={true} visible={menuVisible} animationType="none">
+        <Animated.View 
+          style={[styles.overlay, { opacity: overlayOpacity }]} 
+          onStartShouldSetResponder={() => true}
+          onResponderRelease={() => setMenuVisible(false)}
+        >
+          <Animated.View 
+            style={[
+              styles.sidebar, 
+              { transform: [{ translateX: sidebarPosition }] }
+            ]}
+          >
+            <View style={styles.sidebarHeader}>
+              <Text style={styles.sidebarTitle}>Menu</Text>
+              <TouchableOpacity 
+                onPress={() => setMenuVisible(false)}
+                style={styles.closeButton}
+              >
+                <Ionicons name="close" size={24} color="#6C63FF" />
+              </TouchableOpacity>
+            </View>
 
-            <TouchableOpacity onPress={() => { setMenuVisible(false); navigationRef.current?.navigate("Home"); }}>
+            <TouchableOpacity 
+              style={styles.sidebarItemContainer}
+              onPress={() => { 
+                setMenuVisible(false); 
+                navigationRef.current?.navigate("Home"); 
+              }}
+              activeOpacity={0.7}
+            >
+              <Ionicons name="home-outline" size={22} color="#6C63FF" style={styles.sidebarIcon} />
               <Text style={styles.sidebarItem}>Home</Text>
             </TouchableOpacity>
 
             {/* Account Menu with Submenu */}
-            <TouchableOpacity onPress={() => setAccountSubmenuVisible(!accountSubmenuVisible)}>
-              <Text style={styles.sidebarItem}>
-                Accounts {accountSubmenuVisible ? "▼" : "▶"}
-              </Text>
+            <TouchableOpacity 
+              style={styles.sidebarItemContainer}
+              onPress={() => setAccountSubmenuVisible(!accountSubmenuVisible)}
+              activeOpacity={0.7}
+            >
+              <Ionicons name="wallet-outline" size={22} color="#6C63FF" style={styles.sidebarIcon} />
+              <Text style={styles.sidebarItem}>Accounts</Text>
+              <MaterialIcons 
+                name={accountSubmenuVisible ? "keyboard-arrow-up" : "keyboard-arrow-down"} 
+                size={24} 
+                color="#6C63FF" 
+                style={styles.arrowIcon}
+              />
             </TouchableOpacity>
 
             {accountSubmenuVisible && (
               <View style={styles.submenu}>
-                <TouchableOpacity onPress={() => { setMenuVisible(false); navigationRef.current?.navigate("Account"); }}>
-                  <Text style={styles.submenuItem}>Account</Text>
+                <TouchableOpacity 
+                  style={styles.submenuItemContainer}
+                  onPress={() => { 
+                    setMenuVisible(false); 
+                    navigationRef.current?.navigate("Account"); 
+                  }}
+                  activeOpacity={0.7}
+                >
+                  <Text style={styles.submenuItem}>Account List</Text>
                 </TouchableOpacity>
-                <TouchableOpacity onPress={() => { setMenuVisible(false); navigationRef.current?.navigate("AccountCategory"); }}>
-                  <Text style={styles.submenuItem}>Account Category</Text>
+                <TouchableOpacity 
+                  style={styles.submenuItemContainer}
+                  onPress={() => { 
+                    setMenuVisible(false); 
+                    navigationRef.current?.navigate("AccountCategory"); 
+                  }}
+                  activeOpacity={0.7}
+                >
+                  <Text style={styles.submenuItem}>Account Categories</Text>
                 </TouchableOpacity>
               </View>
             )}
 
-            {/* Account Menu with Submenu */}
-            <TouchableOpacity onPress={() => setTransactionSubmenuVisible(!transactionSubmenuVisible)}>
-              <Text style={styles.sidebarItem}>
-                Transactions {transactionSubmenuVisible ? "▼" : "▶"}
-              </Text>
+            {/* Transaction Menu with Submenu */}
+            <TouchableOpacity 
+              style={styles.sidebarItemContainer}
+              onPress={() => setTransactionSubmenuVisible(!transactionSubmenuVisible)}
+              activeOpacity={0.7}
+            >
+              <Ionicons name="swap-horizontal-outline" size={22} color="#6C63FF" style={styles.sidebarIcon} />
+              <Text style={styles.sidebarItem}>Transactions</Text>
+              <MaterialIcons 
+                name={transactionSubmenuVisible ? "keyboard-arrow-up" : "keyboard-arrow-down"} 
+                size={24} 
+                color="#6C63FF" 
+                style={styles.arrowIcon}
+              />
             </TouchableOpacity>
 
             {transactionSubmenuVisible && (
               <View style={styles.submenu}>
-                <TouchableOpacity onPress={() => { setMenuVisible(false); navigationRef.current?.navigate("Transaction"); }}>
-                  <Text style={styles.submenuItem}>Transaction</Text>
+                <TouchableOpacity 
+                  style={styles.submenuItemContainer}
+                  onPress={() => { 
+                    setMenuVisible(false); 
+                    navigationRef.current?.navigate("Transaction"); 
+                  }}
+                  activeOpacity={0.7}
+                >
+                  <Text style={styles.submenuItem}>Transaction List</Text>
                 </TouchableOpacity>
-                <TouchableOpacity onPress={() => { setMenuVisible(false); navigationRef.current?.navigate("Category"); }}>
-                  <Text style={styles.submenuItem}>Category</Text>
+                <TouchableOpacity 
+                  style={styles.submenuItemContainer}
+                  onPress={() => { 
+                    setMenuVisible(false); 
+                    navigationRef.current?.navigate("Category"); 
+                  }}
+                  activeOpacity={0.7}
+                >
+                  <Text style={styles.submenuItem}>Categories</Text>
                 </TouchableOpacity>
               </View>
             )}
 
-            <TouchableOpacity onPress={logout}>
+            <TouchableOpacity 
+              style={styles.sidebarItemContainer}
+              onPress={logout}
+              activeOpacity={0.7}
+            >
+              <Ionicons name="log-out-outline" size={22} color="#6C63FF" style={styles.sidebarIcon} />
               <Text style={styles.sidebarItem}>Logout</Text>
             </TouchableOpacity>
-          </View>
-        </TouchableOpacity>
+          </Animated.View>
+        </Animated.View>
       </Modal>
-
-
     </NavigationContainer>
   );
 }
 
 const styles = StyleSheet.create({
-  centered: { flex: 1, justifyContent: "center", alignItems: "center" },
-  overlay: { flex: 1, backgroundColor: "rgba(0,0,0,0.3)" },
-  sidebar: { width: 250, height: "100%", backgroundColor: "#fff", padding: 20, position: "absolute", left: 0, top: 0 },
-  sidebarTitle: { fontSize: 20, fontWeight: "bold", marginBottom: 15 },
-  sidebarItem: { fontSize: 18, padding: 10, borderBottomWidth: 1, borderBottomColor: "#ccc" },
-  submenu: { paddingLeft: 20, marginTop: 5 },
-  submenuItem: { fontSize: 16, padding: 8, color: "#555" },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "#fff",
+  },
+  loadingText: {
+    marginTop: 16,
+    fontSize: 16,
+    color: "#6C63FF",
+  },
+  menuButton: {
+    marginLeft: 15,
+    padding: 8,
+  },
+  overlay: {
+    flex: 1,
+    backgroundColor: "#000",
+  },
+  sidebar: {
+    width: 280,
+    height: "100%",
+    backgroundColor: "#fff",
+    position: "absolute",
+    left: 0,
+    top: 0,
+    paddingTop: Platform.OS === "android" ? StatusBar.currentHeight : 40,
+  },
+  sidebarHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    paddingHorizontal: 20,
+    paddingBottom: 20,
+    borderBottomWidth: 1,
+    borderBottomColor: "#f0f0f0",
+  },
+  sidebarTitle: {
+    fontSize: 22,
+    fontWeight: "600",
+    color: "#333",
+  },
+  closeButton: {
+    padding: 8,
+  },
+  sidebarItemContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingVertical: 15,
+    paddingHorizontal: 20,
+    borderBottomWidth: 1,
+    borderBottomColor: "#f0f0f0",
+  },
+  sidebarItem: {
+    fontSize: 16,
+    color: "#333",
+    marginLeft: 15,
+  },
+  sidebarIcon: {
+    width: 24,
+    textAlign: "center",
+  },
+  arrowIcon: {
+    marginLeft: "auto",
+  },
+  submenu: {
+    backgroundColor: "#f9f9f9",
+  },
+  submenuItemContainer: {
+    paddingVertical: 12,
+    paddingLeft: 60,
+    borderBottomWidth: 1,
+    borderBottomColor: "#f0f0f0",
+  },
+  submenuItem: {
+    fontSize: 15,
+    color: "#555",
+  },
 });
-
 
 export const navigationRef = createNavigationContainerRef();
