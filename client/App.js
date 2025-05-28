@@ -1,11 +1,11 @@
 import React, { useEffect, useState } from "react";
-import { 
-  View, 
-  ActivityIndicator, 
-  Alert, 
-  Modal, 
-  TouchableOpacity, 
-  StyleSheet, 
+import {
+  View,
+  ActivityIndicator,
+  Alert,
+  Modal,
+  TouchableOpacity,
+  StyleSheet,
   Text,
   Animated,
   Easing,
@@ -27,6 +27,7 @@ import TransactionScreen from "./screens/TransactionScreen";
 import SavingsGoalScreen from "./screens/SavingsGoalScreen";
 import CreditCardRemindersScreen from "./screens/CreditCardRemindersScreen";
 import RecurringTransactionsScreen from "./screens/RecurringTransactionScreen";
+import FamilyAccountsScreen from "./screens/Family/FamilyAccountsScreen";
 
 const Stack = createStackNavigator();
 
@@ -36,7 +37,7 @@ export default function App() {
   const [menuVisible, setMenuVisible] = useState(false);
   const [accountSubmenuVisible, setAccountSubmenuVisible] = useState(false);
   const [transactionSubmenuVisible, setTransactionSubmenuVisible] = useState(false);
-  
+
   // Animation values
   const sidebarPosition = new Animated.Value(-300);
   const overlayOpacity = new Animated.Value(0);
@@ -61,7 +62,7 @@ export default function App() {
           useNativeDriver: true,
         }),
         Animated.timing(overlayOpacity, {
-          toValue: 0.5,
+          toValue: 1,
           duration: 300,
           useNativeDriver: true,
         }),
@@ -131,7 +132,7 @@ export default function App() {
   return (
     <NavigationContainer ref={navigationRef}>
       <StatusBar barStyle="dark-content" backgroundColor="#fff" />
-      
+
       <Stack.Navigator
         screenOptions={{
           headerStyle: {
@@ -154,8 +155,8 @@ export default function App() {
               options={{
                 title: "Dashboard",
                 headerLeft: ({ navigation }) => (
-                  <TouchableOpacity 
-                    onPress={() => setMenuVisible(true)} 
+                  <TouchableOpacity
+                    onPress={() => setMenuVisible(true)}
                     style={styles.menuButton}
                   >
                     <Ionicons name="menu" size={28} color="#6C63FF" />
@@ -170,8 +171,8 @@ export default function App() {
               options={{
                 title: "Accounts",
                 headerLeft: ({ navigation }) => (
-                  <TouchableOpacity 
-                    onPress={() => setMenuVisible(true)} 
+                  <TouchableOpacity
+                    onPress={() => setMenuVisible(true)}
                     style={styles.menuButton}
                   >
                     <Ionicons name="menu" size={28} color="#6C63FF" />
@@ -186,8 +187,8 @@ export default function App() {
               options={{
                 title: "Account Categories",
                 headerLeft: ({ navigation }) => (
-                  <TouchableOpacity 
-                    onPress={() => setMenuVisible(true)} 
+                  <TouchableOpacity
+                    onPress={() => setMenuVisible(true)}
                     style={styles.menuButton}
                   >
                     <Ionicons name="menu" size={28} color="#6C63FF" />
@@ -202,8 +203,8 @@ export default function App() {
               options={{
                 title: "Categories",
                 headerLeft: ({ navigation }) => (
-                  <TouchableOpacity 
-                    onPress={() => setMenuVisible(true)} 
+                  <TouchableOpacity
+                    onPress={() => setMenuVisible(true)}
                     style={styles.menuButton}
                   >
                     <Ionicons name="menu" size={28} color="#6C63FF" />
@@ -214,12 +215,28 @@ export default function App() {
               {(props) => <CategoryScreen {...props} onLogout={logout} />}
             </Stack.Screen>
             <Stack.Screen
+              name="FamilyAccounts"
+              options={{
+                title: "Family Accounts",
+                headerLeft: ({ navigation }) => (
+                  <TouchableOpacity
+                    onPress={() => setMenuVisible(true)}
+                    style={styles.menuButton}
+                  >
+                    <Ionicons name="menu" size={28} color="#6C63FF" />
+                  </TouchableOpacity>
+                ),
+              }}
+            >
+              {(props) => <FamilyAccountsScreen {...props} onLogout={logout} />}
+            </Stack.Screen>
+            <Stack.Screen
               name="CreditCardReminders"
               options={{
                 title: "Credit Card Reminders",
                 headerLeft: ({ navigation }) => (
-                  <TouchableOpacity 
-                    onPress={() => setMenuVisible(true)} 
+                  <TouchableOpacity
+                    onPress={() => setMenuVisible(true)}
                     style={styles.menuButton}
                   >
                     <Ionicons name="menu" size={28} color="#6C63FF" />
@@ -234,8 +251,8 @@ export default function App() {
               options={{
                 title: "Recurring Transactions",
                 headerLeft: ({ navigation }) => (
-                  <TouchableOpacity 
-                    onPress={() => setMenuVisible(true)} 
+                  <TouchableOpacity
+                    onPress={() => setMenuVisible(true)}
                     style={styles.menuButton}
                   >
                     <Ionicons name="menu" size={28} color="#6C63FF" />
@@ -250,8 +267,8 @@ export default function App() {
               options={{
                 title: "Savings Goal",
                 headerLeft: ({ navigation }) => (
-                  <TouchableOpacity 
-                    onPress={() => setMenuVisible(true)} 
+                  <TouchableOpacity
+                    onPress={() => setMenuVisible(true)}
                     style={styles.menuButton}
                   >
                     <Ionicons name="menu" size={28} color="#6C63FF" />
@@ -266,8 +283,8 @@ export default function App() {
               options={{
                 title: "Transactions",
                 headerLeft: ({ navigation }) => (
-                  <TouchableOpacity 
-                    onPress={() => setMenuVisible(true)} 
+                  <TouchableOpacity
+                    onPress={() => setMenuVisible(true)}
                     style={styles.menuButton}
                   >
                     <Ionicons name="menu" size={28} color="#6C63FF" />
@@ -280,16 +297,16 @@ export default function App() {
           </>
         ) : (
           <>
-            <Stack.Screen 
-              name="Login" 
+            <Stack.Screen
+              name="Login"
               options={{ headerShown: false }}
             >
               {(props) => <LoginScreen {...props} onLogin={login} />}
             </Stack.Screen>
-            <Stack.Screen 
-              name="Register" 
-              options={{ headerShown: false }} 
-              component={RegisterScreen} 
+            <Stack.Screen
+              name="Register"
+              options={{ headerShown: false }}
+              component={RegisterScreen}
             />
           </>
         )}
@@ -297,20 +314,27 @@ export default function App() {
 
       {/* Sidebar Menu Modal */}
       <Modal transparent={true} visible={menuVisible} animationType="none">
-        <Animated.View 
-          style={[styles.overlay, { opacity: overlayOpacity }]} 
+        <Animated.View
+          style={[styles.overlay, { opacity: overlayOpacity }]}
           onStartShouldSetResponder={() => true}
           onResponderRelease={() => setMenuVisible(false)}
         >
-          <Animated.View 
+          {/* This View captures all touches within the sidebar content */}
+          <Animated.View
             style={[
-              styles.sidebar, 
+              styles.sidebar,
               { transform: [{ translateX: sidebarPosition }] }
             ]}
+            onStartShouldSetResponder={() => true} // This view becomes the responder
+            onResponderRelease={(e) => {
+              // Ensure this touch event does not bubble up to the overlay
+              // This is crucial for preventing the sidebar from closing on inner taps
+              e.stopPropagation();
+            }}
           >
             <View style={styles.sidebarHeader}>
               <Text style={styles.sidebarTitle}>Menu</Text>
-              <TouchableOpacity 
+              <TouchableOpacity
                 onPress={() => setMenuVisible(false)}
                 style={styles.closeButton}
               >
@@ -318,11 +342,11 @@ export default function App() {
               </TouchableOpacity>
             </View>
 
-            <TouchableOpacity 
+            <TouchableOpacity
               style={styles.sidebarItemContainer}
-              onPress={() => { 
-                setMenuVisible(false); 
-                navigationRef.current?.navigate("Home"); 
+              onPress={() => {
+                setMenuVisible(false);
+                navigationRef.current?.navigate("Home");
               }}
               activeOpacity={0.7}
             >
@@ -331,38 +355,38 @@ export default function App() {
             </TouchableOpacity>
 
             {/* Account Menu with Submenu */}
-            <TouchableOpacity 
+            <TouchableOpacity
               style={styles.sidebarItemContainer}
               onPress={() => setAccountSubmenuVisible(!accountSubmenuVisible)}
               activeOpacity={0.7}
             >
               <Ionicons name="wallet-outline" size={22} color="#6C63FF" style={styles.sidebarIcon} />
               <Text style={styles.sidebarItem}>Accounts</Text>
-              <MaterialIcons 
-                name={accountSubmenuVisible ? "keyboard-arrow-up" : "keyboard-arrow-down"} 
-                size={24} 
-                color="#6C63FF" 
+              <MaterialIcons
+                name={accountSubmenuVisible ? "keyboard-arrow-up" : "keyboard-arrow-down"}
+                size={24}
+                color="#6C63FF"
                 style={styles.arrowIcon}
               />
             </TouchableOpacity>
 
             {accountSubmenuVisible && (
               <View style={styles.submenu}>
-                <TouchableOpacity 
+                <TouchableOpacity
                   style={styles.submenuItemContainer}
-                  onPress={() => { 
-                    setMenuVisible(false); 
-                    navigationRef.current?.navigate("Account"); 
+                  onPress={() => {
+                    setMenuVisible(false);
+                    navigationRef.current?.navigate("Account");
                   }}
                   activeOpacity={0.7}
                 >
                   <Text style={styles.submenuItem}>Account List</Text>
                 </TouchableOpacity>
-                <TouchableOpacity 
+                <TouchableOpacity
                   style={styles.submenuItemContainer}
-                  onPress={() => { 
-                    setMenuVisible(false); 
-                    navigationRef.current?.navigate("AccountCategory"); 
+                  onPress={() => {
+                    setMenuVisible(false);
+                    navigationRef.current?.navigate("AccountCategory");
                   }}
                   activeOpacity={0.7}
                 >
@@ -372,38 +396,38 @@ export default function App() {
             )}
 
             {/* Transaction Menu with Submenu */}
-            <TouchableOpacity 
+            <TouchableOpacity
               style={styles.sidebarItemContainer}
               onPress={() => setTransactionSubmenuVisible(!transactionSubmenuVisible)}
               activeOpacity={0.7}
             >
               <Ionicons name="swap-horizontal-outline" size={22} color="#6C63FF" style={styles.sidebarIcon} />
               <Text style={styles.sidebarItem}>Transactions</Text>
-              <MaterialIcons 
-                name={transactionSubmenuVisible ? "keyboard-arrow-up" : "keyboard-arrow-down"} 
-                size={24} 
-                color="#6C63FF" 
+              <MaterialIcons
+                name={transactionSubmenuVisible ? "keyboard-arrow-up" : "keyboard-arrow-down"}
+                size={24}
+                color="#6C63FF"
                 style={styles.arrowIcon}
               />
             </TouchableOpacity>
 
             {transactionSubmenuVisible && (
               <View style={styles.submenu}>
-                <TouchableOpacity 
+                <TouchableOpacity
                   style={styles.submenuItemContainer}
-                  onPress={() => { 
-                    setMenuVisible(false); 
-                    navigationRef.current?.navigate("Transaction"); 
+                  onPress={() => {
+                    setMenuVisible(false);
+                    navigationRef.current?.navigate("Transaction");
                   }}
                   activeOpacity={0.7}
                 >
                   <Text style={styles.submenuItem}>Transaction List</Text>
                 </TouchableOpacity>
-                <TouchableOpacity 
+                <TouchableOpacity
                   style={styles.submenuItemContainer}
-                  onPress={() => { 
-                    setMenuVisible(false); 
-                    navigationRef.current?.navigate("Category"); 
+                  onPress={() => {
+                    setMenuVisible(false);
+                    navigationRef.current?.navigate("Category");
                   }}
                   activeOpacity={0.7}
                 >
@@ -412,11 +436,11 @@ export default function App() {
               </View>
             )}
 
-            <TouchableOpacity 
+            <TouchableOpacity
               style={styles.sidebarItemContainer}
-              onPress={() => { 
-                setMenuVisible(false); 
-                navigationRef.current?.navigate("SavingsGoal"); 
+              onPress={() => {
+                setMenuVisible(false);
+                navigationRef.current?.navigate("SavingsGoal");
               }}
               activeOpacity={0.7}
             >
@@ -424,11 +448,23 @@ export default function App() {
               <Text style={styles.sidebarItem}>Savings Goal</Text>
             </TouchableOpacity>
 
-            <TouchableOpacity 
+            <TouchableOpacity
               style={styles.sidebarItemContainer}
-              onPress={() => { 
-                setMenuVisible(false); 
-                navigationRef.current?.navigate("CreditCardReminders"); 
+              onPress={() => {
+                setMenuVisible(false);
+                navigationRef.current?.navigate("FamilyAccounts");
+              }}
+              activeOpacity={0.7}
+            >
+              <Ionicons name="home-outline" size={22} color="#6C63FF" style={styles.sidebarIcon} />
+              <Text style={styles.sidebarItem}>Family Accounts</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={styles.sidebarItemContainer}
+              onPress={() => {
+                setMenuVisible(false);
+                navigationRef.current?.navigate("CreditCardReminders");
               }}
               activeOpacity={0.7}
             >
@@ -436,11 +472,11 @@ export default function App() {
               <Text style={styles.sidebarItem}>Credit Card Reminders</Text>
             </TouchableOpacity>
 
-            <TouchableOpacity 
+            <TouchableOpacity
               style={styles.sidebarItemContainer}
-              onPress={() => { 
-                setMenuVisible(false); 
-                navigationRef.current?.navigate("RecurringTransactions"); 
+              onPress={() => {
+                setMenuVisible(false);
+                navigationRef.current?.navigate("RecurringTransactions");
               }}
               activeOpacity={0.7}
             >
@@ -448,7 +484,7 @@ export default function App() {
               <Text style={styles.sidebarItem}>Recurring Transactions</Text>
             </TouchableOpacity>
 
-            <TouchableOpacity 
+            <TouchableOpacity
               style={styles.sidebarItemContainer}
               onPress={logout}
               activeOpacity={0.7}
@@ -481,7 +517,7 @@ const styles = StyleSheet.create({
   },
   overlay: {
     flex: 1,
-    backgroundColor: "#000",
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
   },
   sidebar: {
     width: 280,
@@ -491,6 +527,7 @@ const styles = StyleSheet.create({
     left: 0,
     top: 0,
     paddingTop: Platform.OS === "android" ? StatusBar.currentHeight : 40,
+    opacity: 1,
   },
   sidebarHeader: {
     flexDirection: "row",

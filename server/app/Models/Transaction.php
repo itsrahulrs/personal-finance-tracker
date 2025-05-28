@@ -11,7 +11,7 @@ class Transaction extends Model
     use HasFactory, SoftDeletes;
 
     protected $fillable = [
-        'account_id', 'category_id', 'type', 'name', 'amount', 'description', 'transaction_date'
+        'account_id', 'category_id', 'type', 'name', 'amount', 'description', 'transaction_date', 'user_id'
     ];
 
     protected $dates = ['transaction_date', 'deleted_at'];
