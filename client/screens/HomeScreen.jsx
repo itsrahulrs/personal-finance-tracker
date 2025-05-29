@@ -114,7 +114,7 @@ const HomeScreen = ({ navigation, onLogout }) => {
                 {/* Balance Card */}
                 <View style={styles.balanceCard}>
                     <Text style={styles.balanceTitle}>Total Balance</Text>
-                    <Text style={styles.balanceAmount}>${stats.totalBalance.toLocaleString()}</Text>
+                    <Text style={styles.balanceAmount}>₹{stats.totalBalance.toLocaleString()}</Text>
                     
                     <View style={styles.incomeExpenseContainer}>
                         <View style={styles.incomeExpenseItem}>
@@ -124,7 +124,7 @@ const HomeScreen = ({ navigation, onLogout }) => {
                             <View>
                                 <Text style={styles.incomeExpenseLabel}>Income</Text>
                                 <Text style={[styles.incomeExpenseValue, { color: '#28a745' }]}>
-                                    +${stats.income.toLocaleString()}
+                                    +₹{stats.income.toLocaleString()}
                                 </Text>
                             </View>
                         </View>
@@ -136,7 +136,7 @@ const HomeScreen = ({ navigation, onLogout }) => {
                             <View>
                                 <Text style={styles.incomeExpenseLabel}>Expenses</Text>
                                 <Text style={[styles.incomeExpenseValue, { color: '#dc3545' }]}>
-                                    -${stats.expenses.toLocaleString()}
+                                    -₹{stats.expenses.toLocaleString()}
                                 </Text>
                             </View>
                         </View>
@@ -213,7 +213,7 @@ const HomeScreen = ({ navigation, onLogout }) => {
                                         { color: transaction.type === 'income' ? '#28a745' : '#dc3545' }
                                     ]}
                                 >
-                                    {transaction.type === 'income' ? '+' : '-'}${transaction.amount}
+                                    {transaction.type === 'income' ? '+' : '-'}₹{transaction.amount}
                                 </Text>
                             </TouchableOpacity>
                         ))}

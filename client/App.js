@@ -444,7 +444,7 @@ export default function App() {
               }}
               activeOpacity={0.7}
             >
-              <Ionicons name="home-outline" size={22} color="#6C63FF" style={styles.sidebarIcon} />
+              <Ionicons name="ios-pie-chart-outline" size={22} color="#6C63FF" style={styles.sidebarIcon} />
               <Text style={styles.sidebarItem}>Savings Goal</Text>
             </TouchableOpacity>
 
@@ -456,7 +456,7 @@ export default function App() {
               }}
               activeOpacity={0.7}
             >
-              <Ionicons name="home-outline" size={22} color="#6C63FF" style={styles.sidebarIcon} />
+              <Ionicons name="people-outline" size={22} color="#6C63FF" style={styles.sidebarIcon} />
               <Text style={styles.sidebarItem}>Family Accounts</Text>
             </TouchableOpacity>
 
@@ -468,7 +468,7 @@ export default function App() {
               }}
               activeOpacity={0.7}
             >
-              <Ionicons name="home-outline" size={22} color="#6C63FF" style={styles.sidebarIcon} />
+              <Ionicons name="card-outline" size={22} color="#6C63FF" style={styles.sidebarIcon} />
               <Text style={styles.sidebarItem}>Credit Card Reminders</Text>
             </TouchableOpacity>
 
@@ -480,7 +480,7 @@ export default function App() {
               }}
               activeOpacity={0.7}
             >
-              <Ionicons name="home-outline" size={22} color="#6C63FF" style={styles.sidebarIcon} />
+              <Ionicons name="repeat-outline" size={22} color="#6C63FF" style={styles.sidebarIcon} />
               <Text style={styles.sidebarItem}>Recurring Transactions</Text>
             </TouchableOpacity>
 

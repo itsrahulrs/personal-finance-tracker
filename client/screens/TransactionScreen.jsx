@@ -312,7 +312,7 @@ const TransactionScreen = ({ navigation, onLogout }) => {
                                 <View style={styles.transactionText}>
                                     <Text style={styles.transactionName}>{item.name}</Text>
                                     <Text style={styles.transactionAmount}>
-                                        {item.type === "income" ? "+" : "-"} ${parseFloat(item.amount).toFixed(2)}
+                                        {item.type === "income" ? "+" : "-"} ₹{parseFloat(item.amount).toFixed(2)}
                                     </Text>
                                     {item.description ? (
                                         <Text style={styles.transactionDescription}>{item.description}</Text>
