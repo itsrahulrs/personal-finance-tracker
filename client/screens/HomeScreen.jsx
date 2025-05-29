@@ -290,17 +290,6 @@ const HomeScreen = ({ navigation, onLogout }) => {
                             style={styles.menuItem}
                             onPress={() => {
                                 setMenuVisible(false);
-                                navigation.navigate('Account');
-                            }}
-                        >
-                            <Ionicons name="settings-outline" size={20} color="#6C63FF" />
-                            <Text style={styles.menuItemText}>Settings</Text>
-                        </TouchableOpacity>
-                        
-                        <TouchableOpacity 
-                            style={styles.menuItem}
-                            onPress={() => {
-                                setMenuVisible(false);
                                 onLogout();
                             }}
                         >
