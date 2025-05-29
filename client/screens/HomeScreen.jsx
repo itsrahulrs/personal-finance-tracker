@@ -43,26 +43,54 @@ const HomeScreen = ({ navigation, onLogout }) => {
                         "Content-Type": "application/json",
                         "Authorization": `Bearer ${token}`,
                     },
-                });
+                });                
 
                 const profileData = await profileResponse.json();
-                
-                // Fetch dashboard stats (mock data - replace with your actual API)
-                const statsResponse = {
-                    totalBalance: 12500,
-                    income: 3500,
-                    expenses: 1200,
-                    recentTransactions: [
-                        { id: 1, title: "Salary", amount: 3500, type: "income", date: "2023-05-15" },
-                        { id: 2, title: "Rent", amount: 800, type: "expense", date: "2023-05-10" },
-                        { id: 3, title: "Groceries", amount: 150, type: "expense", date: "2023-05-08" },
-                        { id: 4, title: "Freelance Work", amount: 1200, type: "income", date: "2023-05-05" }
-                    ]
-                };
+                console.log(profileData);
 
-                if (profileResponse.ok) {
+                const transactionsResponse = await fetch(`http://192.168.31.167:8000/api/transaction`, {
+                    method: "GET",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "Authorization": `Bearer ${token}`,
+                    },
+                });
+                const transactionsData = await transactionsResponse.json();
+                console.log(transactionsData);
+
+                if (profileResponse.ok && transactionsResponse.ok) {
                     setUserProfile(profileData);
-                    setStats(statsResponse);
+
+                    // --- 3. Process Transactions to Calculate Stats ---
+                    let totalIncome = 0;
+                    let totalExpenses = 0;
+
+                    // Assuming transactionsData is an array of transaction objects
+                    transactionsData.data.forEach(transaction => {
+                        const amount = parseFloat(transaction.amount); // Ensure amount is a number
+                        if (transaction.type === 'income') {
+                            totalIncome += amount;
+                        } else if (transaction.type === 'expense') {
+                            totalExpenses += amount;
+                        }
+                    });
+
+                    const calculatedTotalBalance = totalIncome - totalExpenses;
+
+                    // Sort transactions by date to get recent ones (optional, but good for "Recent Transactions")
+                    const sortedTransactions = transactionsData.data.sort((a, b) =>
+                        new Date(b.transaction_date) - new Date(a.transaction_date)
+                    );
+
+                    // Take only the top few for "Recent Transactions" section, e.g., 4
+                    const recentTransactions = sortedTransactions.slice(0, 4);
+
+                    setStats({
+                        totalBalance: calculatedTotalBalance,
+                        income: totalIncome,
+                        expenses: totalExpenses,
+                        recentTransactions: recentTransactions
+                    });
                     
                     navigation.setOptions({
                         headerRight: () => (
@@ -204,7 +232,7 @@ const HomeScreen = ({ navigation, onLogout }) => {
                                     />
                                 </View>
                                 <View style={styles.transactionDetails}>
-                                    <Text style={styles.transactionTitle}>{transaction.title}</Text>
+                                    <Text style={styles.transactionTitle}>{transaction.name}</Text>
                                     <Text style={styles.transactionDate}>{transaction.date}</Text>
                                 </View>
                                 <Text 
