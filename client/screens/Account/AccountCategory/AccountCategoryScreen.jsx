@@ -76,7 +76,7 @@ const AccountCategoryScreen = ({ navigation }) => {
   );
 
   const calculateTotalBalance = (accounts) => {
-    return accounts.reduce((sum, acc) => sum + Number(acc.balance), 0);
+    return accounts?.reduce((sum, acc) => sum + Number(acc.balance), 0);
   };
 
   const addCategory = async () => {
@@ -277,7 +277,7 @@ const AccountCategoryScreen = ({ navigation }) => {
                     <View style={styles.categoryText}>
                       <Text style={styles.categoryName}>{item.name}</Text>
                       <Text style={styles.categoryBalance}>
-                        ₹{totalBalance.toLocaleString('en-IN')}
+                        ₹{totalBalance?.toLocaleString('en-IN')}
                       </Text>
                     </View>
                   </View>
@@ -329,7 +329,7 @@ const AccountCategoryScreen = ({ navigation }) => {
                             styles.accountBalance,
                             account.balance >= 0 ? styles.positiveBalance : styles.negativeBalance
                           ]}>
-                            ₹{Number(account.balance).toLocaleString('en-IN')}
+                            ₹{Number(account.balance)?.toLocaleString('en-IN')}
                           </Text>
                         </TouchableOpacity>
                       ))
