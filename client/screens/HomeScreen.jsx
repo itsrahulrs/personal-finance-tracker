@@ -251,7 +251,7 @@ const HomeScreen = ({ navigation, onLogout }) => {
                             style={styles.menuItem}
                             onPress={() => {
                                 setMenuVisible(false);
-                                navigation.navigate('Account');
+                                navigation.navigate('Profile');
                             }}
                         >
                             <Ionicons name="person-outline" size={20} color="#6C63FF" />

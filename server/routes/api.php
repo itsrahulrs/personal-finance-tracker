@@ -10,6 +10,7 @@ use App\Http\Controllers\FamilyAccountController;
 use App\Http\Controllers\FamilyAccountInvitationController;
 use App\Http\Controllers\FamilyAccountMemberController;
 use App\Http\Controllers\FamilyBudgetController;
+use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\RecurringTransactionController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\TransactionController;
@@ -38,13 +39,13 @@ Route::get('/profile', [AuthController::class, 'profile'])->middleware('auth:san
 Route::get('/email/verify/{id}/{hash}', function (Request $request) {
     $user = User::find($request->route("id"));
 
-    if(!$user) {
+    if (!$user) {
         return response()->json([
-            'message'=> 'User not found'
+            'message' => 'User not found'
         ], 404);
     }
 
-    if($user->hasVerifidEmail) {
+    if ($user->hasVerifidEmail) {
         return response()->json([
             'message' => 'Email already verified'
         ], 400);
@@ -53,14 +54,14 @@ Route::get('/email/verify/{id}/{hash}', function (Request $request) {
     $user->markEmailAsVerified();
 
     return response()->json([
-        'message'=> 'Email verified successfully'
+        'message' => 'Email verified successfully'
     ]);
 })->middleware(['signed'])->name('verification.verify');
 
 Route::middleware('auth:sanctum')->post('/email/resend', function (Request $request) {
-    
+
     $request->user()->SendEmailVerificationNotification();
-    return response()->json(['message'=> 'Verification email sent']);
+    return response()->json(['message' => 'Verification email sent']);
 })->middleware('auth:sanctum');
 
 Route::middleware(['auth:sanctum'])->group(function () {
@@ -83,4 +84,6 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::get('/reports', [ReportController::class, 'index']);
     Route::post('/family-members/invite', [FamilyAccountInvitationController::class, 'sendInvite']);
     Route::get('/family-members/accept-invite/{token}', [FamilyAccountInvitationController::class, 'acceptInvite']);
+    Route::put('/profile', [ProfileController::class, 'update']);
+    Route::put('/change-password', [ProfileController::class, 'changePassword']);
 });
