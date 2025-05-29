@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\FamilyAccount;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
 
 class FamilyAccountController extends Controller
@@ -24,7 +25,7 @@ class FamilyAccountController extends Controller
     {
         $validator = Validator::make($request->all(), [
             'name' => 'required|string|max:100',
-            'owner_id' => 'required|exists:users,id', // Ensure owner_id exists in the users table
+            // 'owner_id' => 'required|exists:users,id', // Ensure owner_id exists in the users table
         ]);
 
         if ($validator->fails()) {
@@ -37,7 +38,7 @@ class FamilyAccountController extends Controller
 
         $account = FamilyAccount::create([
             'name' => $request->name,
-            'owner_id' => $request->owner_id,
+            'owner_id' => Auth::id(),
         ]);
 
         return response()->json([
@@ -80,7 +81,7 @@ class FamilyAccountController extends Controller
 
         $validator = Validator::make($request->all(), [
             'name' => 'required|string|max:100',
-            'owner_id' => 'required|exists:users,id', // Ensure owner_id exists in the users table
+            // 'owner_id' => 'required|exists:users,id', // Ensure owner_id exists in the users table
         ]);
 
         if ($validator->fails()) {
@@ -93,7 +94,7 @@ class FamilyAccountController extends Controller
 
         $account->update([
             'name' => $request->name,
-            'owner_id' => $request->owner_id,
+            'owner_id' => Auth::id(),
         ]);
 
         return response()->json([

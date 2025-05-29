@@ -7,6 +7,7 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\CreditCardReminderController;
 use App\Http\Controllers\FamilyAccountController;
+use App\Http\Controllers\FamilyAccountInvitationController;
 use App\Http\Controllers\FamilyAccountMemberController;
 use App\Http\Controllers\FamilyBudgetController;
 use App\Http\Controllers\RecurringTransactionController;
@@ -80,4 +81,6 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::apiResource('/family-account-members', FamilyAccountMemberController::class);
     Route::apiResource('/family-budgets', FamilyBudgetController::class);
     Route::get('/reports', [ReportController::class, 'index']);
+    Route::post('/family-members/invite', [FamilyAccountInvitationController::class, 'sendInvite']);
+    Route::get('/family-members/accept-invite/{token}', [FamilyAccountInvitationController::class, 'acceptInvite']);
 });

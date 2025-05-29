@@ -13,7 +13,10 @@ class FamilyAccountMember extends Model
     protected $fillable = [
         'family_account_id',
         'user_id',
-        'role'
+        'email',
+        'role',
+        'status',
+        'invitation_token',
     ];
 
     public $timestamps = false;

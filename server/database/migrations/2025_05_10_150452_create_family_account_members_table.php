@@ -15,7 +15,10 @@ return new class extends Migration
             $table->id();
             $table->unsignedBigInteger('family_account_id');
             $table->unsignedBigInteger('user_id');
+            $table->string('email');
             $table->enum('role', ['admin', 'member'])->default('member');
+            $table->enum('status', ['pending', 'accepted', 'declined'])->default('pending');
+            $table->string('invitation_token')->nullable()->unique();
             $table->timestamps();
             $table->softDeletes();
 
