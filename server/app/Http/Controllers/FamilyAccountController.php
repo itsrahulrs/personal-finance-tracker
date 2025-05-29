@@ -12,7 +12,7 @@ class FamilyAccountController extends Controller
     // List all family accounts
     public function index()
     {
-        $accounts = FamilyAccount::all();
+        $accounts = FamilyAccount::with(['owner', 'members'])->get();
         return response()->json([
             'status' => true,
             'message' => 'Family accounts fetched successfully',
