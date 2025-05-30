@@ -15,6 +15,7 @@ import {
 } from "react-native";
 import { Ionicons, MaterialIcons, FontAwesome } from '@expo/vector-icons';
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { BASE_URL } from "../config";
 
 const HomeScreen = ({ navigation, onLogout }) => {
     const [userProfile, setUserProfile] = useState(null);
@@ -37,7 +38,7 @@ const HomeScreen = ({ navigation, onLogout }) => {
                 }
 
                 // Fetch user profile
-                const profileResponse = await fetch("http://192.168.31.167:8000/api/profile", {
+                const profileResponse = await fetch(`${BASE_URL}/profile`, {
                     method: "GET",
                     headers: {
                         "Content-Type": "application/json",
@@ -48,7 +49,7 @@ const HomeScreen = ({ navigation, onLogout }) => {
                 const profileData = await profileResponse.json();
                 console.log(profileData);
 
-                const transactionsResponse = await fetch(`http://192.168.31.167:8000/api/transaction`, {
+                const transactionsResponse = await fetch(`${BASE_URL}/transaction`, {
                     method: "GET",
                     headers: {
                         "Content-Type": "application/json",

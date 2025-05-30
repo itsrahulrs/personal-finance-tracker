@@ -61,7 +61,7 @@ const RegisterScreen = ({ navigation }) => {
         setLoading(true);
 
         try {
-            const response = await fetch('http://192.168.31.167:8000/api/register', {
+            const response = await fetch('${BASE_URL}/register', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(form),

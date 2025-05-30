@@ -13,6 +13,7 @@ import {
   Image
 } from "react-native";
 import { Ionicons } from '@expo/vector-icons';
+import { BASE_URL } from "../config";
 
 const LoginScreen = ({ navigation, onLogin }) => {
     const [email, setEmail] = useState("");
@@ -33,7 +34,7 @@ const LoginScreen = ({ navigation, onLogin }) => {
 
         setLoading(true);
         try {
-            const response = await fetch("http://192.168.31.167:8000/api/login", {
+            const response = await fetch(`${BASE_URL}/login`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ email, password }),

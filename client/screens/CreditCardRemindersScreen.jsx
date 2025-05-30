@@ -7,6 +7,7 @@ import {
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { MaterialIcons, Ionicons, Feather } from "@expo/vector-icons";
 import DateTimePicker from '@react-native-community/datetimepicker';
+import { BASE_URL } from "../config";
 
 const CreditCardRemindersScreen = ({ navigation }) => {
     const [cards, setCards] = useState([]);
@@ -34,7 +35,7 @@ const CreditCardRemindersScreen = ({ navigation }) => {
         try {
             setRefreshing(true);
             const token = await AsyncStorage.getItem("authToken");
-            const response = await fetch("http://192.168.31.167:8000/api/credit-card-reminders", {
+            const response = await fetch(`${BASE_URL}/credit-card-reminders`, {
                 method: "GET",
                 headers: {
                     "Content-Type": "application/json",
@@ -107,7 +108,7 @@ const CreditCardRemindersScreen = ({ navigation }) => {
 
         try {
             const token = await AsyncStorage.getItem("authToken");
-            const response = await fetch("http://192.168.31.167:8000/api/credit-card-reminders", {
+            const response = await fetch(`${BASE_URL}/credit-card-reminders`, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
@@ -142,7 +143,7 @@ const CreditCardRemindersScreen = ({ navigation }) => {
 
         try {
             const token = await AsyncStorage.getItem("authToken");
-            const response = await fetch(`http://192.168.31.167:8000/api/credit-card-reminders/${selectedCard.id}`, {
+            const response = await fetch(`${BASE_URL}/credit-card-reminders/${selectedCard.id}`, {
                 method: "PUT",
                 headers: {
                     "Content-Type": "application/json",
@@ -185,7 +186,7 @@ const CreditCardRemindersScreen = ({ navigation }) => {
                     onPress: async () => {
                         try {
                             const token = await AsyncStorage.getItem("authToken");
-                            const response = await fetch(`http://192.168.31.167:8000/api/credit-card-reminders/${cardId}`, {
+                            const response = await fetch(`${BASE_URL}/credit-card-reminders/${cardId}`, {
                                 method: "DELETE",
                                 headers: {
                                     "Authorization": `Bearer ${token}`,

@@ -8,6 +8,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { MaterialIcons, Ionicons, Feather } from "@expo/vector-icons";
 import DateTimePicker from '@react-native-community/datetimepicker';
 import DropDownPicker from "react-native-dropdown-picker";
+import { BASE_URL } from "../config";
 
 const RecurringTransactionsScreen = ({ navigation }) => {
     const [transactions, setTransactions] = useState([]);
@@ -52,7 +53,7 @@ const RecurringTransactionsScreen = ({ navigation }) => {
         try {
             setRefreshing(true);
             const token = await AsyncStorage.getItem("authToken");
-            const response = await fetch("http://192.168.31.167:8000/api/recurring-transactions", {
+            const response = await fetch(`${BASE_URL}/recurring-transactions`, {
                 method: "GET",
                 headers: {
                     "Content-Type": "application/json",
@@ -126,7 +127,7 @@ const RecurringTransactionsScreen = ({ navigation }) => {
 
         try {
             const token = await AsyncStorage.getItem("authToken");
-            const response = await fetch("http://192.168.31.167:8000/api/recurring-transactions", {
+            const response = await fetch(`${BASE_URL}/recurring-transactions`, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
@@ -162,7 +163,7 @@ const RecurringTransactionsScreen = ({ navigation }) => {
 
         try {
             const token = await AsyncStorage.getItem("authToken");
-            const response = await fetch(`http://192.168.31.167:8000/api/recurring-transactions/${selectedTransaction.id}`, {
+            const response = await fetch(`${BASE_URL}/recurring-transactions/${selectedTransaction.id}`, {
                 method: "PUT",
                 headers: {
                     "Content-Type": "application/json",
@@ -206,7 +207,7 @@ const RecurringTransactionsScreen = ({ navigation }) => {
                     onPress: async () => {
                         try {
                             const token = await AsyncStorage.getItem("authToken");
-                            const response = await fetch(`http://192.168.31.167:8000/api/recurring-transactions/${transactionId}`, {
+                            const response = await fetch(`${BASE_URL}/recurring-transactions/${transactionId}`, {
                                 method: "DELETE",
                                 headers: {
                                     "Authorization": `Bearer ${token}`,

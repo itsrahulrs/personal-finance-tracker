@@ -19,6 +19,7 @@ import {
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { MaterialIcons, Ionicons, Feather } from "@expo/vector-icons";
 import DropDownPicker from "react-native-dropdown-picker";
+import { BASE_URL } from "../../config";
 
 const AccountScreen = ({ navigation, onLogout }) => {
   const [accounts, setAccounts] = useState([]);
@@ -48,7 +49,7 @@ const AccountScreen = ({ navigation, onLogout }) => {
         return;
       }
 
-      const response = await fetch("http://192.168.31.167:8000/api/account", {
+      const response = await fetch(`${BASE_URL}/account`, {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
@@ -93,11 +94,11 @@ const AccountScreen = ({ navigation, onLogout }) => {
       const formattedBalance = parseFloat(balance).toFixed(2);
       const token = await AsyncStorage.getItem("authToken");
 
-      let url = "http://192.168.31.167:8000/api/account";
+      let url = `${BASE_URL}/account`;
       let method = "POST";
 
       if (editMode) {
-        url = `http://192.168.31.167:8000/api/account/${selectedAccount.id}`;
+        url = `${BASE_URL}/account/${selectedAccount.id}`;
         method = "PUT";
       }
 
@@ -146,7 +147,7 @@ const AccountScreen = ({ navigation, onLogout }) => {
               const token = await AsyncStorage.getItem("authToken");
 
               const response = await fetch(
-                `http://192.168.31.167:8000/api/account/${accountId}`,
+                `${BASE_URL}/account/${accountId}`,
                 {
                   method: "DELETE",
                   headers: {
@@ -191,7 +192,7 @@ const AccountScreen = ({ navigation, onLogout }) => {
         return;
       }
 
-      const response = await fetch("http://192.168.31.167:8000/api/account-category", {
+      const response = await fetch(`${BASE_URL}/account-category`, {
         method: "GET",
         headers: {
           "Content-Type": "application/json",

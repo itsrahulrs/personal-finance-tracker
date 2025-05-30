@@ -17,6 +17,7 @@ import {
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Ionicons, Feather, MaterialCommunityIcons } from "@expo/vector-icons"; // Added MaterialCommunityIcons for password icon
 import { useNavigation } from "@react-navigation/native";
+import { BASE_URL } from "../config";
 
 const ProfileScreen = () => {
   const navigation = useNavigation();
@@ -47,7 +48,7 @@ const ProfileScreen = () => {
 
 
   // Hardcoded API base URL - consider moving to a config file
-  const API_BASE_URL = "http://192.168.31.167:8000/api";
+  const API_BASE_URL = `${BASE_URL}`;
 
   const fetchProfile = useCallback(async () => {
     setLoading(true);

@@ -29,6 +29,7 @@ import CreditCardRemindersScreen from "./screens/CreditCardRemindersScreen";
 import RecurringTransactionsScreen from "./screens/RecurringTransactionScreen";
 import FamilyAccountsScreen from "./screens/Family/FamilyAccountsScreen";
 import ProfileScreen from "./screens/ProfileScreen";
+import { BASE_URL } from "./config";
 
 const Stack = createStackNavigator();
 
@@ -94,7 +95,7 @@ export default function App() {
         return;
       }
 
-      const response = await fetch("http://192.168.31.167:8000/api/logout", {
+      const response = await fetch(`${BASE_URL}/logout`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

@@ -9,6 +9,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { MaterialIcons, Ionicons, Feather } from "@expo/vector-icons";
 import DropDownPicker from "react-native-dropdown-picker";
 import TransactionTypeSelector from "../components/TransactionTypeSelector";
+import { BASE_URL } from "../config";
 
 const TransactionScreen = ({ navigation, onLogout }) => {
     // State management
@@ -52,7 +53,7 @@ const TransactionScreen = ({ navigation, onLogout }) => {
     const fetchTransactions = async () => {
         try {
             const token = await AsyncStorage.getItem("authToken");
-            const response = await fetch("http://192.168.31.167:8000/api/transaction", {
+            const response = await fetch(`${BASE_URL}/transaction`, {
                 method: "GET",
                 headers: {
                     "Content-Type": "application/json",
@@ -77,7 +78,7 @@ const TransactionScreen = ({ navigation, onLogout }) => {
     const fetchAccounts = async () => {
         try {
             const token = await AsyncStorage.getItem("authToken");
-            const response = await fetch("http://192.168.31.167:8000/api/account", {
+            const response = await fetch(`${BASE_URL}/account`, {
                 method: "GET",
                 headers: {
                     "Content-Type": "application/json",
@@ -100,7 +101,7 @@ const TransactionScreen = ({ navigation, onLogout }) => {
     const fetchCategories = async () => {
         try {
             const token = await AsyncStorage.getItem("authToken");
-            const response = await fetch("http://192.168.31.167:8000/api/category", {
+            const response = await fetch(`${BASE_URL}/category`, {
                 method: "GET",
                 headers: {
                     "Content-Type": "application/json",
@@ -131,7 +132,7 @@ const TransactionScreen = ({ navigation, onLogout }) => {
             const token = await AsyncStorage.getItem("authToken");
             const formattedAmount = parseFloat(amount).toFixed(2);
 
-            const response = await fetch("http://192.168.31.167:8000/api/transaction", {
+            const response = await fetch(`${BASE_URL}/transaction`, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
@@ -174,7 +175,7 @@ const TransactionScreen = ({ navigation, onLogout }) => {
                     onPress: async () => {
                         try {
                             const token = await AsyncStorage.getItem("authToken");
-                            const response = await fetch(`http://192.168.31.167:8000/api/transaction/${transactionId}`, {
+                            const response = await fetch(`${BASE_URL}/transaction/${transactionId}`, {
                                 method: "DELETE",
                                 headers: {
                                     "Authorization": `Bearer ${token}`,

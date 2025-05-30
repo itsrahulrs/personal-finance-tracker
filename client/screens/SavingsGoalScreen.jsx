@@ -7,6 +7,7 @@ import {
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { MaterialIcons, Ionicons, Feather } from "@expo/vector-icons";
 import DateTimePicker from '@react-native-community/datetimepicker';
+import { BASE_URL } from "../config";
 
 const SavingsGoalScreen = ({ navigation }) => {
     const [goals, setGoals] = useState([]);
@@ -34,7 +35,7 @@ const SavingsGoalScreen = ({ navigation }) => {
         try {
             setRefreshing(true);
             const token = await AsyncStorage.getItem("authToken");
-            const response = await fetch("http://192.168.31.167:8000/api/savings-goals", {
+            const response = await fetch(`${BASE_URL}/savings-goals`, {
                 method: "GET",
                 headers: {
                     "Content-Type": "application/json",
@@ -100,7 +101,7 @@ const SavingsGoalScreen = ({ navigation }) => {
 
         try {
             const token = await AsyncStorage.getItem("authToken");
-            const response = await fetch("http://192.168.31.167:8000/api/savings-goals", {
+            const response = await fetch(`${BASE_URL}/savings-goals`, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
@@ -133,7 +134,7 @@ const SavingsGoalScreen = ({ navigation }) => {
 
         try {
             const token = await AsyncStorage.getItem("authToken");
-            const response = await fetch(`http://192.168.31.167:8000/api/savings-goals/${selectedGoal.id}`, {
+            const response = await fetch(`${BASE_URL}/savings-goals/${selectedGoal.id}`, {
                 method: "PUT",
                 headers: {
                     "Content-Type": "application/json",
@@ -199,7 +200,7 @@ const SavingsGoalScreen = ({ navigation }) => {
                     onPress: async () => {
                         try {
                             const token = await AsyncStorage.getItem("authToken");
-                            const response = await fetch(`http://192.168.31.167:8000/api/savings-goals/${goalId}`, {
+                            const response = await fetch(`${BASE_URL}/savings-goals/${goalId}`, {
                                 method: "DELETE",
                                 headers: {
                                     "Authorization": `Bearer ${token}`,

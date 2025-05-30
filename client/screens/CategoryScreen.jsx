@@ -16,6 +16,7 @@ import {
 } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { MaterialIcons, Ionicons, Feather } from "@expo/vector-icons";
+import { BASE_URL } from "../config";
 
 const CategoryScreen = ({ navigation }) => {
   const [categories, setCategories] = useState([]);
@@ -36,7 +37,7 @@ const CategoryScreen = ({ navigation }) => {
   const fetchCategories = async () => {
     try {
       const token = await AsyncStorage.getItem("authToken");
-      const response = await fetch("http://192.168.31.167:8000/api/category", {
+      const response = await fetch(`${BASE_URL}/category`, {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
@@ -77,7 +78,7 @@ const CategoryScreen = ({ navigation }) => {
 
     try {
       const token = await AsyncStorage.getItem("authToken");
-      const response = await fetch("http://192.168.31.167:8000/api/category", {
+      const response = await fetch(`${BASE_URL}/category`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -113,7 +114,7 @@ const CategoryScreen = ({ navigation }) => {
     try {
       const token = await AsyncStorage.getItem("authToken");
       const response = await fetch(
-        `http://192.168.31.167:8000/api/category/${selectedCategory.id}`,
+        `${BASE_URL}/category/${selectedCategory.id}`,
         {
           method: "PUT",
           headers: {
@@ -174,7 +175,7 @@ const CategoryScreen = ({ navigation }) => {
             try {
               const token = await AsyncStorage.getItem("authToken");
               const response = await fetch(
-                `http://192.168.31.167:8000/api/category/${categoryId}`,
+                `${BASE_URL}/category/${categoryId}`,
                 {
                   method: "DELETE",
                   headers: {
