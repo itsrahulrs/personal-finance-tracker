@@ -28,7 +28,7 @@ const LoginScreen = ({ navigation, onLogin }) => {
         }
 
         if (!password) {
-            Alert.alert("Error", "Password is required");
+            Alert.alert("Error", "Password is reqsuired");
             return;
         }
 
