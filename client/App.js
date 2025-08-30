@@ -30,6 +30,7 @@ import RecurringTransactionsScreen from "./screens/RecurringTransactionScreen";
 import FamilyAccountsScreen from "./screens/Family/FamilyAccountsScreen";
 import ProfileScreen from "./screens/ProfileScreen";
 import { BASE_URL } from "./config";
+import ReportScreen from "./screens/ReportScreen";
 
 const Stack = createStackNavigator();
 
@@ -265,6 +266,22 @@ export default function App() {
               {(props) => <RecurringTransactionsScreen {...props} onLogout={logout} />}
             </Stack.Screen>
             <Stack.Screen
+              name="Report"
+              options={{
+                title: "Reports",
+                headerLeft: ({ navigation }) => (
+                  <TouchableOpacity
+                    onPress={() => setMenuVisible(true)}
+                    style={styles.menuButton}
+                  >
+                    <Ionicons name="menu" size={28} color="#6C63FF" />
+                  </TouchableOpacity>
+                ),
+              }}
+            >
+              {(props) => <ReportScreen {...props} onLogout={logout} />}
+            </Stack.Screen>
+            <Stack.Screen
               name="SavingsGoal"
               options={{
                 title: "Savings Goal",
@@ -490,6 +507,18 @@ export default function App() {
             >
               <Ionicons name="repeat-outline" size={22} color="#6C63FF" style={styles.sidebarIcon} />
               <Text style={styles.sidebarItem}>Recurring Transactions</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={styles.sidebarItemContainer}
+              onPress={() => {
+                setMenuVisible(false);
+                navigationRef.current?.navigate("Report");
+              }}
+              activeOpacity={0.7}
+            >
+              <Ionicons name="bar-chart-outline" size={22} color="#6C63FF" style={styles.sidebarIcon} />
+              <Text style={styles.sidebarItem}>Reports</Text>
             </TouchableOpacity>
 
             <TouchableOpacity

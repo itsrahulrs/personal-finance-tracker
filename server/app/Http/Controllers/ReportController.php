@@ -31,8 +31,8 @@ class ReportController extends Controller
                 $endDate = Carbon::now()->endOfDay()->toDateTimeString();
                 break;
             case 'custom':
-                $startDate = $request->query('start_date');
-                $endDate = $request->query('end_date');
+                $startDate = Carbon::parse($request->query('start_date'))->startOfDay()->toDateTimeString();
+                $endDate = Carbon::parse($request->query('end_date'))->startOfDay()->toDateTimeString();
                 break;
             case 'monthly':
             default:
