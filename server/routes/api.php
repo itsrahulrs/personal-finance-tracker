@@ -10,6 +10,7 @@ use App\Http\Controllers\FamilyAccountController;
 use App\Http\Controllers\FamilyAccountInvitationController;
 use App\Http\Controllers\FamilyAccountMemberController;
 use App\Http\Controllers\FamilyBudgetController;
+use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\RecurringTransactionController;
 use App\Http\Controllers\ReportController;
@@ -87,3 +88,5 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::put('/profile', [ProfileController::class, 'update']);
     Route::put('/change-password', [ProfileController::class, 'changePassword']);
 });
+
+Route::post('/save-expo-token', [NotificationController::class, 'saveToken']);

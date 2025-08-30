@@ -13,6 +13,7 @@ import {
   ScrollView
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { BASE_URL } from '../config';
 
 const RegisterScreen = ({ navigation }) => {
     const [form, setForm] = useState({
@@ -61,7 +62,7 @@ const RegisterScreen = ({ navigation }) => {
         setLoading(true);
 
         try {
-            const response = await fetch('${BASE_URL}/register', {
+            const response = await fetch(`${BASE_URL}/register`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(form),
