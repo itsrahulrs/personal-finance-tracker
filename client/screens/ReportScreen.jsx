@@ -16,6 +16,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Ionicons } from '@expo/vector-icons';
 import DateTimePicker from "@react-native-community/datetimepicker";
 import { Picker } from "@react-native-picker/picker";
+import { generateReportPdf } from "../utils/pdfGenerator";
 
 // API Base URL (replace with your actual URL or config)
 const BASE_URL = 'http://192.168.31.167:8000/api';
@@ -234,6 +235,15 @@ const ReportScreen = () => {
                     </View>
                     <TouchableOpacity style={styles.applyButton} onPress={fetchReport}>
                         <Text style={styles.applyButtonText}>Apply Filters</Text>
+                    </TouchableOpacity>
+
+                    <TouchableOpacity
+                        style={styles.exportButton}
+                        onPress={() => generateReportPdf(report)}
+                        disabled={!report}
+                    >
+                        <Ionicons name="document-text-outline" size={24} color="#fff" />
+                        <Text style={styles.exportButtonText}>Export as PDF</Text>
                     </TouchableOpacity>
                 </View>
 
@@ -574,6 +584,22 @@ const styles = StyleSheet.create({
         textAlign: 'center',
         color: '#6c757d',
         paddingVertical: 20,
+    },
+    exportButton: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'center',
+        backgroundColor: '#dc3545',
+        paddingVertical: 15,
+        borderRadius: 8,
+        marginTop: 20,
+        opacity: 1,
+    },
+    exportButtonText: {
+        color: '#fff',
+        fontWeight: 'bold',
+        fontSize: 16,
+        marginLeft: 10,
     },
 });
 
