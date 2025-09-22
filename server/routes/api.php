@@ -54,9 +54,23 @@ Route::get('/email/verify/{id}/{hash}', function (Request $request) {
 
     $user->markEmailAsVerified();
 
-    return response()->json([
-        'message' => 'Email verified successfully'
-    ]);
+   return response("
+    <div style='
+        background:#e6ffed;
+        color:#065f46;
+        border:1px solid #34d399;
+        padding:10px 15px;
+        border-radius:6px;
+        font-size:14px;
+        max-width:300px;
+        margin:20px auto;
+        text-align:center;
+        font-family:sans-serif;
+    '>
+        ✅ Email verified successfully
+    </div>
+");
+
 })->middleware(['signed'])->name('verification.verify');
 
 Route::middleware('auth:sanctum')->post('/email/resend', function (Request $request) {
@@ -84,9 +98,9 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::apiResource('/family-budgets', FamilyBudgetController::class);
     Route::get('/reports', [ReportController::class, 'index']);
     Route::post('/family-members/invite', [FamilyAccountInvitationController::class, 'sendInvite']);
-    Route::get('/family-members/accept-invite/{token}', [FamilyAccountInvitationController::class, 'acceptInvite']);
     Route::put('/profile', [ProfileController::class, 'update']);
     Route::put('/change-password', [ProfileController::class, 'changePassword']);
 });
 
+Route::get('/family-members/accept-invite/{token}', [FamilyAccountInvitationController::class, 'acceptInvite']);
 Route::post('/save-expo-token', [NotificationController::class, 'saveToken']);

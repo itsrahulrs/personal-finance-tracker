@@ -32,7 +32,7 @@ class FamilyAccountInvitationController extends Controller
             'invitation_token' => $token,
         ]);
 
-        $invitationUrl = url("/family-members/accept-invite/{$token}");
+        $invitationUrl = url("/api/family-members/accept-invite/{$token}");
         Mail::to($request->email)->send(new FamilyAccountInvitation(auth()->user()->name, $invitationUrl));
 
         return response()->json(['message' => 'Invitation sent successfully', 'token' => $token]);
@@ -43,27 +43,44 @@ class FamilyAccountInvitationController extends Controller
         $member = FamilyAccountMember::where('invitation_token', $token)->first();
 
         if (!$member) {
-            return response()->json(['message' => 'Invalid or expired invitation.'], 404);
-        }
-
-        // Simulate user auth (in reality, you'd want the user to log in/register)
-        $user = Auth::user(); // ensure user is authenticated
-
-        if (!$user) {
-            return response()->json(['message' => 'Please log in to accept the invitation.'], 401);
-        }
-
-        // Optional: check if the email matches logged-in user
-        if ($user->email !== $member->email) {
-            return response()->json(['message' => 'This invite was sent to a different email.'], 403);
+            return response("
+                <div style='
+                    background:#fee2e2;
+                    color:#b91c1c;
+                    border:1px solid #f87171;
+                    padding:15px 20px;
+                    border-radius:8px;
+                    font-size:16px;
+                    max-width:400px;
+                    margin:50px auto;
+                    text-align:center;
+                    font-family:sans-serif;
+                '>
+                    ❌ Invalid or expired invitation.
+                </div>
+            ", 404);
         }
 
         $member->update([
-            'user_id' => $user->id,
-            'status' => 'accepted',
+            'status'           => 'accepted',
             'invitation_token' => null
         ]);
 
-        return response()->json(['message' => 'Invitation accepted!', 'member' => $member]);
+        return response("
+            <div style='
+                background:#dcfce7;
+                color:#166534;
+                border:1px solid #22c55e;
+                padding:15px 20px;
+                border-radius:8px;
+                font-size:16px;
+                max-width:400px;
+                margin:50px auto;
+                text-align:center;
+                font-family:sans-serif;
+            '>
+                ✅ Invitation accepted successfully!
+            </div>
+        ");
     }
 }
