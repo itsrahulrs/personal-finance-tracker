@@ -469,7 +469,7 @@ export default function App() {
               }}
               activeOpacity={0.7}
             >
-              <Ionicons name="ios-pie-chart-outline" size={22} color="#6C63FF" style={styles.sidebarIcon} />
+              <Ionicons name="pie-chart-outline" size={22} color="#6C63FF" style={styles.sidebarIcon} />
               <Text style={styles.sidebarItem}>Savings Goal</Text>
             </TouchableOpacity>
 

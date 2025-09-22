@@ -17,10 +17,9 @@ import { Ionicons } from '@expo/vector-icons';
 import DateTimePicker from "@react-native-community/datetimepicker";
 import { Picker } from "@react-native-picker/picker";
 import { generateReportPdf } from "../utils/pdfGenerator";
+import { BASE_URL } from "../config";
 
 // API Base URL (replace with your actual URL or config)
-const BASE_URL = 'http://192.168.31.167:8000/api';
-
 const ReportScreen = () => {
     const [filter, setFilter] = useState("monthly");
     const [report, setReport] = useState(null);
